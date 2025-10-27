@@ -38,6 +38,7 @@ Repository = "https://github.com/denisecase/pro-analytics-02-starter"
 
 [project.optional-dependencies]
 dev = [
+  "pre0commit", # run some tests automatically
   "pytest", # run some tests automatically
   "pytest-cov", # coverage report for more visibility
 ]
