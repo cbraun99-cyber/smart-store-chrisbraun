@@ -31,25 +31,17 @@ Complete each step in the following guide.
 
 It includes the critical commands to set up your local environment (and activate it):
 
-```shell
-uv venv
-uv python pin 3.12
-uv sync --extra dev --extra docs --upgrade
-uv run pre-commit install
-uv run python --version
-```
+`uv venv`
+`uv python pin 3.12`
+`uv sync --extra dev --extra docs --upgrade`
+`uv run pre-commit install`
+`uv run python --version`
 
 **Windows (PowerShell):**
-
-```shell
-.\.venv\Scripts\activate
-```
+`.\.venv\Scripts\activate`
 
 **macOS / Linux / WSL:**
-
-```shell
-source .venv/bin/activate
-```
+`source .venv/bin/activate`
 
 ---
 
@@ -62,9 +54,7 @@ When working on a project, we open just that project in VS Code.
 
 Always start with `git pull` to check for any changes made to the GitHub repo.
 
-```shell
-git pull
-```
+`git pull`
 
 ### 3.2 Run Checks as You Work
 
@@ -80,53 +70,43 @@ This mirrors real work where we typically:
 
 In VS Code, open your repository, then open a terminal (Terminal / New Terminal) and run the following commands one at a time to check the code.
 
-```shell
-uv sync --extra dev --extra docs --upgrade
-uv cache clean
-git add .
-uvx ruff check --fix
-uvx pre-commit autoupdate
-uv run pre-commit run --all-files
-git add .
-uv run pytest
-```
+`uv sync --extra dev --extra docs --upgrade`
+`uv cache clean`
+`git add .`
+`uvx ruff check --fix`
+`uvx pre-commit autoupdate`
+`uv run pre-commit run --all-files`
+`git add .`
+`uv run pytest`
 
 NOTE: The second `git add .` ensures any automatic fixes made by Ruff or pre-commit are included before testing or committing.
 
-<details>
-<summary>Click to see a note on best practices</summary>
-
+*Note on best practices:*
 `uvx` runs the latest version of a tool in an isolated cache, outside the virtual environment.
 This keeps the project light and simple, but behavior can change when the tool updates.
 For fully reproducible results, or when you need to use the local `.venv`, use `uv run` instead.
-
-</details>
 
 ### 3.3 Build Project Documentation
 
 Make sure you have current doc dependencies, then build your docs, fix any errors, and serve them locally to test.
 
-```shell
-uv run mkdocs build --strict
-uv run mkdocs serve
-```
+`uv run mkdocs build --strict`
+`uv run mkdocs serve`
 
 - After running the serve command, the local URL of the docs will be provided. To open the site, press **CTRL and click** the provided link (at the same time) to view the documentation. On a Mac, use **CMD and click**.
 - Press **CTRL c** (at the same time) to stop the hosting process.
 
-### 3.4 Execute
+### 3.4 Execute Demo Modules
 
 This project includes demo code.
 Run the demo Python modules to confirm everything is working.
 
 In VS Code terminal, run:
 
-```shell
-uv run python -m analytics_project.demo_module_basics
-uv run python -m analytics_project.demo_module_languages
-uv run python -m analytics_project.demo_module_stats
-uv run python -m analytics_project.demo_module_viz
-```
+`uv run python -m analytics_project.demo_module_basics`
+`uv run python -m analytics_project.demo_module_languages`
+`uv run python -m analytics_project.demo_module_stats`
+`uv run python -m analytics_project.demo_module_viz`
 
 You should see:
 
@@ -135,15 +115,23 @@ You should see:
 - Simple statistics
 - A chart window open (close the chart window to continue).
 
-If this works, your project is ready! If not, check:
+### 3.5 Execute Data Processing Pipeline
 
-- Are you in the right folder? (All terminal commands are to be run from the root project folder.)
-- Did you run the full `uv sync --extra dev --extra docs --upgrade` command?
-- Are there any error messages? (ask for help with the exact error)
+Run the data preparation module to process CSV files and create DataFrames:
 
----
+`uv run python -m analytics_project.data_prep`
 
-### 3.5 Git add-commit-push to GitHub
+**Expected Output:**
+- Log messages showing successful CSV file reads
+- DataFrame shapes for each processed file (customers, products, sales)
+- Check `logs/analytics_project.log` for detailed execution records
+
+**Verification Steps:**
+1. Ensure all three CSV files are processed without errors
+2. Verify DataFrame shapes are reported (e.g., "1000 rows x 8 cols")
+3. Check log files for any warnings or error messages
+
+### 3.6 Git add-commit-push to GitHub
 
 Anytime we make working changes to code is a good time to git add-commit-push to GitHub.
 
@@ -151,15 +139,13 @@ Anytime we make working changes to code is a good time to git add-commit-push to
 2. Commit your changes with a useful message in quotes.
 3. Push your work to GitHub.
 
-```shell
-git add .
-git commit -m "describe your change in quotes"
-git push -u origin main
-```
+`git add .`
+`git commit -m "describe your change in quotes"`
+`git push -u origin main`
 
 This will trigger the GitHub Actions workflow and publish your documentation via GitHub Pages.
 
-### 3.6 Modify and Debug
+### 3.7 Modify and Debug
 
 With a working version safe in GitHub, start making changes to the code.
 
@@ -167,4 +153,30 @@ Before starting a new session, remember to do a `git pull` and keep your tools u
 
 Each time forward progress is made, remember to git add-commit-push.
 
+---
 
+## Data Files Preparation
+
+For the data processing pipeline to work, ensure your CSV files are placed in the correct location:
+
+1. Create the data directory structure:
+   `mkdir -p data/raw data/processed`
+
+2. Place your CSV files in `data/raw/` with these expected names:
+   - `customers_data.csv`
+   - `products_data.csv`
+   - `sales_data.csv`
+
+3. Run the data processing module:
+   `uv run python -m analytics_project.data_prep`
+
+## Troubleshooting
+
+If the data_prep module fails, check:
+
+- Are you in the root project folder when running commands?
+- Do the CSV files exist in `data/raw/` with correct names?
+- Are there any error messages in the terminal or log files?
+- Did you run `uv sync` to ensure all dependencies are installed?
+
+View detailed logs in `logs/analytics_project.log` for debugging information.
