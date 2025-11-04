@@ -117,19 +117,45 @@ You should see:
 
 ### 3.5 Execute Data Processing Pipeline
 
-Run the data preparation module to process CSV files and create DataFrames:
+Run the individual data preparation scripts to process CSV files and create cleaned datasets:
 
-`uv run python -m analytics_project.data_prep`
+#### Customer Data Preparation
+`uv run python scripts/data_preparation/prepare_customers_data.py`
 
-**Expected Output:**
-- Log messages showing successful CSV file reads
-- DataFrame shapes for each processed file (customers, products, sales)
-- Check `logs/analytics_project.log` for detailed execution records
+**Features:**
+- Adds customer-related columns (LoyaltyPoints, CustomerSegment)
+- Removes duplicate customers based on CustomerID
+- Handles missing values (fills LoyaltyPoints with 0, CustomerSegment with 'Unknown')
+- Cleans and validates loyalty points and customer segments
+- Removes outliers and invalid CustomerIDs
 
-**Verification Steps:**
-1. Ensure all three CSV files are processed without errors
-2. Verify DataFrame shapes are reported (e.g., "1000 rows x 8 cols")
-3. Check log files for any warnings or error messages
+#### Product Data Preparation
+`uv run python scripts/data_preparation/prepare_products_data.py`
+
+**Features:**
+- Adds product-related columns (StockQuantity, ProductCategory)
+- Removes duplicate products based on ProductID
+- Handles missing values (fills StockQuantity with 0, ProductCategory with 'Uncategorized')
+- Cleans stock quantities and standardizes product categories
+- Removes outliers using IQR method
+- Standardizes text formatting
+
+#### Sales Data Preparation
+`uv run python scripts/data_preparation/prepare_sales_data.py`
+
+**Features:**
+- Cleans numeric columns (SaleAmount, DiscountPercent, etc.)
+- Standardizes date formats and removes invalid dates
+- Removes duplicate transactions based on TransactionID
+- Handles missing values (fills CampaignID with -1, DiscountPercent with 0)
+- Cleans discount percentages and payment types
+- Removes outliers based on sale amounts
+
+**Expected Output for All Scripts:**
+- Detailed log messages showing each processing step
+- DataFrame shapes before and after cleaning
+- Validation reports and data quality metrics
+- Cleaned CSV files saved to `data/prepared/` directory
 
 ### 3.6 Git add-commit-push to GitHub
 
@@ -160,23 +186,46 @@ Each time forward progress is made, remember to git add-commit-push.
 For the data processing pipeline to work, ensure your CSV files are placed in the correct location:
 
 1. Create the data directory structure:
-   `mkdir -p data/raw data/processed`
+   `mkdir -p data/raw data/prepared`
 
 2. Place your CSV files in `data/raw/` with these expected names:
    - `customers_data.csv`
    - `products_data.csv`
    - `sales_data.csv`
 
-3. Run the data processing module:
-   `uv run python -m analytics_project.data_prep`
+3. Run the individual data preparation scripts:
+   `uv run python scripts/data_preparation/prepare_customers_data.py`
+   `uv run python scripts/data_preparation/prepare_products_data.py`
+   `uv run python scripts/data_preparation/prepare_sales_data.py`
+
+## Data Processing Features
+
+### Customer Data Processing
+- **Column Addition**: Adds LoyaltyPoints and CustomerSegment columns with realistic distributions
+- **Data Cleaning**: Handles missing values, removes duplicates, and standardizes segment names
+- **Validation**: Ensures CustomerID uniqueness and valid loyalty point ranges
+- **Outlier Removal**: Filters extreme loyalty points and invalid customer IDs
+
+### Product Data Processing
+- **Column Addition**: Adds StockQuantity and ProductCategory columns with realistic values
+- **Data Cleaning**: Standardizes category names, handles negative stock quantities
+- **Quality Control**: Uses IQR method for outlier detection in stock levels
+- **Format Standardization**: Converts text to title case and ensures proper data types
+
+### Sales Data Processing
+- **Numeric Cleaning**: Converts all numeric columns to proper types, handles conversion errors
+- **Date Standardization**: Converts SaleDate to consistent YYYY-MM-DD format
+- **Business Logic**: Validates discount percentages (0-100%) and payment types
+- **Outlier Detection**: Removes negative sales and extreme sale amounts using statistical methods
 
 ## Troubleshooting
 
-If the data_prep module fails, check:
+If any data preparation script fails, check:
 
 - Are you in the root project folder when running commands?
 - Do the CSV files exist in `data/raw/` with correct names?
 - Are there any error messages in the terminal or log files?
 - Did you run `uv sync` to ensure all dependencies are installed?
+- Check individual script logs for specific data quality issues
 
-View detailed logs in `logs/analytics_project.log` for debugging information.
+View detailed logs for each script execution to identify and resolve data quality problems.
