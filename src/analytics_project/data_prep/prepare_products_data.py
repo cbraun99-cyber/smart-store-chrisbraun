@@ -25,7 +25,7 @@ import sys
 import pandas as pd
 import numpy as np
 
-# Ensure project root is in sys.path for local imports (now 3 parents are needed)
+# Ensure project root is in sys.path for local imports
 sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
 
 # Import local modules (e.g. utils/logger.py)
@@ -35,16 +35,11 @@ from utils.logger import logger
 from utils.data_scrubber import DataScrubber
 
 
-# Constants
-SCRIPTS_DATA_PREP_DIR: pathlib.Path = (
-    pathlib.Path(__file__).resolve().parent
-)  # Directory of the current script
-SCRIPTS_DIR: pathlib.Path = SCRIPTS_DATA_PREP_DIR.parent
-PROJECT_ROOT: pathlib.Path = SCRIPTS_DIR.parent
+# Constants - CORRECTED VERSION
+PROJECT_ROOT: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent.parent.parent
 DATA_DIR: pathlib.Path = PROJECT_ROOT / "data"
 RAW_DATA_DIR: pathlib.Path = DATA_DIR / "raw"
-PREPARED_DATA_DIR: pathlib.Path = DATA_DIR / "prepared"  # place to store prepared data
-
+PREPARED_DATA_DIR: pathlib.Path = DATA_DIR / "prepared"
 
 # Ensure the directories exist or create them
 DATA_DIR.mkdir(exist_ok=True)
@@ -69,14 +64,23 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
     logger.info(f"FUNCTION START: read_raw_data with file_name={file_name}")
     file_path = RAW_DATA_DIR.joinpath(file_name)
     logger.info(f"Reading data from {file_path}")
-    df = pd.read_csv(file_path)
-    logger.info(f"Loaded dataframe with {len(df)} rows and {len(df.columns)} columns")
 
-    # Data profiling
-    logger.info(f"Column datatypes: \n{df.dtypes}")
-    logger.info(f"Number of unique values: \n{df.nunique()}")
+    # Check if file exists
+    if not file_path.exists():
+        logger.error(f"File not found: {file_path}")
+        return pd.DataFrame()
 
-    return df
+    try:
+        df = pd.read_csv(file_path)
+        logger.info(f"Loaded dataframe with {len(df)} rows and {len(df.columns)} columns")
+
+        # Data profiling
+        logger.info(f"Column datatypes: \n{df.dtypes}")
+        logger.info(f"Number of unique values: \n{df.nunique()}")
+        return df
+    except Exception as e:
+        logger.error(f"Error reading file: {e}")
+        return pd.DataFrame()
 
 
 def save_prepared_data(df: pd.DataFrame, file_name: str) -> None:
@@ -87,6 +91,10 @@ def save_prepared_data(df: pd.DataFrame, file_name: str) -> None:
         df (pd.DataFrame): Cleaned DataFrame.
         file_name (str): Name of the output file.
     """
+    if df.empty:
+        logger.error("Cannot save empty DataFrame")
+        return
+
     logger.info(
         f"FUNCTION START: save_prepared_data with file_name={file_name}, dataframe shape={df.shape}"
     )
@@ -105,6 +113,10 @@ def add_product_columns(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with new columns added.
     """
+    if df.empty:
+        logger.warning("Cannot add columns to empty DataFrame")
+        return df
+
     logger.info(f"FUNCTION START: add_product_columns with dataframe shape={df.shape}")
 
     # Add StockQuantity (numeric) - inventory levels
@@ -123,6 +135,7 @@ def add_product_columns(df: pd.DataFrame) -> pd.DataFrame:
     if 'ProductCategory' not in df.columns:
         np.random.seed(42)
         # Generate product categories with some data quality issues
+
         categories = np.random.choice(
             [
                 'Electronics',
@@ -155,6 +168,9 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with duplicates removed.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: remove_duplicates with dataframe shape={df.shape}")
     initial_count = len(df)
 
@@ -183,6 +199,9 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with missing values handled.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: handle_missing_values with dataframe shape={df.shape}")
 
     # Log missing values by column before handling
@@ -206,11 +225,6 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
         df['ProductCategory'] = df['ProductCategory'].fillna('Uncategorized')
         logger.info("Filled missing ProductCategory with 'Uncategorized'")
 
-    # Handle other potential missing values
-    # Example for other product columns:
-    # if 'ProductName' in df.columns:
-    #     df['ProductName'] = df['ProductName'].fillna('Unknown Product')
-
     # Log missing values by column after handling
     missing_after = df.isna().sum()
     logger.info(f"Missing values by column after handling:\n{missing_after}")
@@ -228,6 +242,9 @@ def clean_stock_quantity(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with cleaned StockQuantity.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: clean_stock_quantity with dataframe shape={df.shape}")
 
     if 'StockQuantity' in df.columns:
@@ -264,6 +281,9 @@ def clean_product_category(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with cleaned ProductCategory.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: clean_product_category with dataframe shape={df.shape}")
 
     if 'ProductCategory' in df.columns:
@@ -296,6 +316,9 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with outliers removed.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: remove_outliers with dataframe shape={df.shape}")
     initial_count = len(df)
 
@@ -340,6 +363,9 @@ def validate_data(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Validated DataFrame.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: validate_data with dataframe shape={df.shape}")
 
     # Validate ProductID uniqueness
@@ -377,6 +403,9 @@ def standardize_formats(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with standardized formatting.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: standardize_formats with dataframe shape={df.shape}")
 
     # Standardize text fields
@@ -405,16 +434,20 @@ def main() -> None:
     logger.info("STARTING prepare_products_data.py")
     logger.info("==================================")
 
-    logger.info(f"Root         : {PROJECT_ROOT}")
-    logger.info(f"data/raw     : {RAW_DATA_DIR}")
-    logger.info(f"data/prepared: {PREPARED_DATA_DIR}")
-    logger.info(f"scripts      : {SCRIPTS_DIR}")
+    logger.info(f"Project root: {PROJECT_ROOT}")
+    logger.info(f"Raw data dir: {RAW_DATA_DIR}")
+    logger.info(f"Prepared data dir: {PREPARED_DATA_DIR}")
 
     input_file = "products_data.csv"
     output_file = "products_prepared.csv"
 
     # Read raw data
     df = read_raw_data(input_file)
+
+    # Check if data was loaded
+    if df.empty:
+        logger.error("No data loaded - cannot proceed with cleaning")
+        return
 
     # Record original shape
     original_shape = df.shape
@@ -424,15 +457,15 @@ def main() -> None:
     logger.info(f"Initial dataframe shape: {df.shape}")
 
     # Clean column names
-    original_columns = df.columns.tolist()
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+    if not df.empty:
+        original_columns = df.columns.tolist()
+        df.columns = [str(col).strip().lower().replace(' ', '_') for col in df.columns]
 
-    # Log if any column names changed
-    changed_columns = [
-        f"{old} -> {new}" for old, new in zip(original_columns, df.columns) if old != new
-    ]
-    if changed_columns:
-        logger.info(f"Cleaned column names: {', '.join(changed_columns)}")
+        changed_columns = [
+            f"{old} -> {new}" for old, new in zip(original_columns, df.columns) if old != new
+        ]
+        if changed_columns:
+            logger.info(f"Cleaned column names: {', '.join(changed_columns)}")
 
     # Add product-related columns
     df = add_product_columns(df)

@@ -24,7 +24,7 @@ import sys
 # Import from external packages (requires a virtual environment)
 import pandas as pd
 
-# Ensure project root is in sys.path for local imports (now 3 parents are needed)
+# Ensure project root is in sys.path for local imports
 sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
 
 # Import local modules (e.g. utils/logger.py)
@@ -34,16 +34,11 @@ from utils.logger import logger
 from utils.data_scrubber import DataScrubber
 
 
-# Constants
-SCRIPTS_DATA_PREP_DIR: pathlib.Path = (
-    pathlib.Path(__file__).resolve().parent
-)  # Directory of the current script
-SCRIPTS_DIR: pathlib.Path = SCRIPTS_DATA_PREP_DIR.parent
-PROJECT_ROOT: pathlib.Path = SCRIPTS_DIR.parent
+# Constants - CORRECTED VERSION:
+PROJECT_ROOT: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent.parent.parent
 DATA_DIR: pathlib.Path = PROJECT_ROOT / "data"
 RAW_DATA_DIR: pathlib.Path = DATA_DIR / "raw"
-PREPARED_DATA_DIR: pathlib.Path = DATA_DIR / "prepared"  # place to store prepared data
-
+PREPARED_DATA_DIR: pathlib.Path = DATA_DIR / "prepared"
 
 # Ensure the directories exist or create them
 DATA_DIR.mkdir(exist_ok=True)
@@ -68,14 +63,23 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
     logger.info(f"FUNCTION START: read_raw_data with file_name={file_name}")
     file_path = RAW_DATA_DIR.joinpath(file_name)
     logger.info(f"Reading data from {file_path}")
-    df = pd.read_csv(file_path)
-    logger.info(f"Loaded dataframe with {len(df)} rows and {len(df.columns)} columns")
 
-    # Data profiling
-    logger.info(f"Column datatypes: \n{df.dtypes}")
-    logger.info(f"Number of unique values: \n{df.nunique()}")
+    # Check if file exists before reading
+    if not file_path.exists():
+        logger.error(f"File not found: {file_path}")
+        return pd.DataFrame()
 
-    return df
+    try:
+        df = pd.read_csv(file_path)
+        logger.info(f"Loaded dataframe with {len(df)} rows and {len(df.columns)} columns")
+
+        # Data profiling
+        logger.info(f"Column datatypes: \n{df.dtypes}")
+        logger.info(f"Number of unique values: \n{df.nunique()}")
+        return df
+    except Exception as e:
+        logger.error(f"Error reading file: {e}")
+        return pd.DataFrame()
 
 
 def save_prepared_data(df: pd.DataFrame, file_name: str) -> None:
@@ -86,12 +90,50 @@ def save_prepared_data(df: pd.DataFrame, file_name: str) -> None:
         df (pd.DataFrame): Cleaned DataFrame.
         file_name (str): Name of the output file.
     """
+    if df.empty:
+        logger.error("Cannot save empty DataFrame")
+        return
+
     logger.info(
         f"FUNCTION START: save_prepared_data with file_name={file_name}, dataframe shape={df.shape}"
     )
     file_path = PREPARED_DATA_DIR.joinpath(file_name)
     df.to_csv(file_path, index=False)
     logger.info(f"Data saved to {file_path}")
+
+
+def clean_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean numeric columns by converting them to proper numeric types.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with cleaned numeric columns.
+    """
+    if df.empty:
+        return df
+
+    logger.info(f"FUNCTION START: clean_numeric_columns with dataframe shape={df.shape}")
+
+    # Define numeric columns that should be cleaned
+    numeric_columns = [
+        'SaleAmount',
+        'DiscountPercent',
+        'CampaignID',
+        'StoreID',
+        'CustomerID',
+        'ProductID',
+    ]
+
+    for col in numeric_columns:
+        if col in df.columns:
+            # Convert to numeric, coercing errors to NaN
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            logger.info(f"Converted {col} to numeric type")
+
+    return df
 
 
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
@@ -104,6 +146,9 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with duplicates removed.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: remove_duplicates with dataframe shape={df.shape}")
     initial_count = len(df)
 
@@ -132,6 +177,9 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with missing values handled.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: handle_missing_values with dataframe shape={df.shape}")
 
     # Log missing values by column before handling
@@ -177,6 +225,9 @@ def clean_discount_percent(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with cleaned DiscountPercent.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: clean_discount_percent with dataframe shape={df.shape}")
 
     if 'DiscountPercent' in df.columns:
@@ -217,6 +268,9 @@ def clean_payment_type(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with cleaned PaymentType.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: clean_payment_type with dataframe shape={df.shape}")
 
     if 'PaymentType' in df.columns:
@@ -248,6 +302,9 @@ def standardize_date_format(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with standardized dates.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: standardize_date_format with dataframe shape={df.shape}")
 
     if 'SaleDate' in df.columns:
@@ -282,11 +339,24 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with outliers removed.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: remove_outliers with dataframe shape={df.shape}")
     initial_count = len(df)
 
-    # Remove negative sale amounts (invalid)
+    # Remove negative sale amounts (invalid) - first ensure SaleAmount is numeric
     if 'SaleAmount' in df.columns:
+        # Convert SaleAmount to numeric, coercing errors to NaN
+        df['SaleAmount'] = pd.to_numeric(df['SaleAmount'], errors='coerce')
+
+        # Remove rows where SaleAmount couldn't be converted to numeric
+        invalid_sales = df[df['SaleAmount'].isna()]
+        if not invalid_sales.empty:
+            logger.info(f"Removed {len(invalid_sales)} rows with invalid SaleAmount values")
+            df = df[df['SaleAmount'].notna()]
+
+        # Now remove negative sale amounts
         negative_sales = df[df['SaleAmount'] < 0]
         if not negative_sales.empty:
             logger.info(f"Removed {len(negative_sales)} negative SaleAmount values")
@@ -323,6 +393,9 @@ def validate_sales_data(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Validated DataFrame.
     """
+    if df.empty:
+        return df
+
     logger.info(f"FUNCTION START: validate_sales_data with dataframe shape={df.shape}")
 
     # Validate TransactionID uniqueness
@@ -369,16 +442,20 @@ def main() -> None:
     logger.info("STARTING prepare_sales_data.py")
     logger.info("==================================")
 
-    logger.info(f"Root         : {PROJECT_ROOT}")
-    logger.info(f"data/raw     : {RAW_DATA_DIR}")
-    logger.info(f"data/prepared: {PREPARED_DATA_DIR}")
-    logger.info(f"scripts      : {SCRIPTS_DIR}")
+    logger.info(f"Project root: {PROJECT_ROOT}")
+    logger.info(f"Raw data dir: {RAW_DATA_DIR}")
+    logger.info(f"Prepared data dir: {PREPARED_DATA_DIR}")
 
     input_file = "sales_data.csv"
     output_file = "sales_prepared.csv"
 
     # Read raw data
     df = read_raw_data(input_file)
+
+    # Check if data was loaded successfully
+    if df.empty:
+        logger.error("No data loaded - exiting script")
+        return
 
     # Record original shape
     original_shape = df.shape
@@ -388,17 +465,20 @@ def main() -> None:
     logger.info(f"Initial dataframe shape: {df.shape}")
 
     # Clean column names
-    original_columns = df.columns.tolist()
-    df.columns = df.columns.str.strip()
+    if not df.empty:
+        original_columns = df.columns.tolist()
+        df.columns = [str(col).strip() for col in df.columns]
 
-    # Log if any column names changed
-    changed_columns = [
-        f"{old} -> {new}" for old, new in zip(original_columns, df.columns) if old != new
-    ]
-    if changed_columns:
-        logger.info(f"Cleaned column names: {', '.join(changed_columns)}")
+        changed_columns = [
+            f"{old} -> {new}" for old, new in zip(original_columns, df.columns) if old != new
+        ]
+        if changed_columns:
+            logger.info(f"Cleaned column names: {', '.join(changed_columns)}")
 
-    # Standardize date format first
+    # Clean numeric columns first
+    df = clean_numeric_columns(df)
+
+    # Standardize date format
     df = standardize_date_format(df)
 
     # Remove duplicates
