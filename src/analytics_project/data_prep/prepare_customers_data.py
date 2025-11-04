@@ -9,6 +9,7 @@ Tasks:
 - Handle missing values
 - Remove outliers
 - Ensure consistent formatting
+- Add and clean customer-related columns (LoyaltyPoints, CustomerSegment)
 
 """
 
@@ -22,6 +23,7 @@ import sys
 
 # Import from external packages (requires a virtual environment)
 import pandas as pd
+import numpy as np
 
 # Ensure project root is in sys.path for local imports (now 3 parents are needed)
 sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
@@ -84,11 +86,49 @@ def save_prepared_data(df: pd.DataFrame, file_name: str) -> None:
     logger.info(f"Data saved to {file_path}")
 
 
+def add_customer_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add customer-related columns: LoyaltyPoints and CustomerSegment.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with new columns added.
+    """
+    logger.info(f"FUNCTION START: add_customer_columns with dataframe shape={df.shape}")
+
+    # Add LoyaltyPoints (numeric) - generate based on customer behavior
+    if 'LoyaltyPoints' not in df.columns:
+        np.random.seed(42)  # For reproducible results
+        # Generate realistic loyalty points (0-5000, with some high outliers)
+        loyalty_points = np.random.choice(
+            [0, 100, 250, 500, 750, 1000, 1500, 2000, 3000, 5000, 10000, None],
+            size=len(df),
+            p=[0.1, 0.15, 0.15, 0.15, 0.1, 0.1, 0.08, 0.07, 0.05, 0.03, 0.01, 0.01],
+        )
+        df['LoyaltyPoints'] = loyalty_points
+        logger.info("Added LoyaltyPoints column")
+
+    # Add CustomerSegment (category) - segment customers
+    if 'CustomerSegment' not in df.columns:
+        np.random.seed(42)
+        # Generate customer segments with some data quality issues
+        segments = np.random.choice(
+            ['Premium', 'Standard', 'Basic', 'PREMIUM', 'standard', 'New', None],
+            size=len(df),
+            p=[0.2, 0.4, 0.25, 0.05, 0.05, 0.04, 0.01],
+        )
+        df['CustomerSegment'] = segments
+        logger.info("Added CustomerSegment column")
+
+    logger.info(f"New columns added: LoyaltyPoints, CustomerSegment")
+    return df
+
+
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     """
     Remove duplicate rows from the DataFrame.
-    How do you decide if a row is duplicated?
-    Which do you keep? Which do you delete?
 
     Args:
         df (pd.DataFrame): Input DataFrame.
@@ -99,12 +139,7 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: remove_duplicates with dataframe shape={df.shape}")
 
     # Let's delegate this to the DataScrubber class
-    # First, create an instance of the DataScrubber class
-    # by passing in the dataframe as an argument.
     df_scrubber = DataScrubber(df)
-
-    # Now, call the method on our instance to remove duplicates.
-    # This method will return a new dataframe with duplicates removed.
     df_deduped = df_scrubber.remove_duplicate_records()
 
     logger.info(f"Original dataframe shape: {df.shape}")
@@ -115,7 +150,7 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
 def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     """
     Handle missing values by filling or dropping.
-    This logic is specific to the actual data and business rules.
+    Specific handling for customer data with new columns.
 
     Args:
         df (pd.DataFrame): Input DataFrame.
@@ -126,25 +161,107 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: handle_missing_values with dataframe shape={df.shape}")
 
     # Log missing values count before handling
-    missing_before = df.isna().sum().sum()
-    logger.info(f"Total missing values before handling: {missing_before}")
+    missing_before = df.isna().sum()
+    logger.info(f"Missing values before handling:\n{missing_before}")
 
-    # TODO: Fill or drop missing values based on business rules
-    # Example:
-    # df['CustomerName'].fillna('Unknown', inplace=True)
-    # df.dropna(subset=['CustomerID'], inplace=True)
+    # Handle missing CustomerID - these are critical, remove rows
+    if 'CustomerID' in df.columns:
+        initial_count = len(df)
+        df = df[df['CustomerID'].notna()]
+        removed_count = initial_count - len(df)
+        logger.info(f"Removed {removed_count} rows with missing CustomerID")
+
+    # Handle missing LoyaltyPoints - fill with 0 (new customers)
+    if 'LoyaltyPoints' in df.columns:
+        df['LoyaltyPoints'] = df['LoyaltyPoints'].fillna(0).astype(int)
+        logger.info("Filled missing LoyaltyPoints with 0")
+
+    # Handle missing CustomerSegment - fill with 'Unknown'
+    if 'CustomerSegment' in df.columns:
+        df['CustomerSegment'] = df['CustomerSegment'].fillna('Unknown')
+        logger.info("Filled missing CustomerSegment with 'Unknown'")
+
+    # Handle other potential missing values in customer data
+    # Example for other columns you might have:
+    # if 'Email' in df.columns:
+    #     df['Email'] = df['Email'].fillna('unknown@example.com')
 
     # Log missing values count after handling
-    missing_after = df.isna().sum().sum()
-    logger.info(f"Total missing values after handling: {missing_after}")
+    missing_after = df.isna().sum()
+    logger.info(f"Missing values after handling:\n{missing_after}")
     logger.info(f"{len(df)} records remaining after handling missing values.")
+    return df
+
+
+def clean_loyalty_points(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean LoyaltyPoints column - handle invalid values.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with cleaned LoyaltyPoints.
+    """
+    logger.info(f"FUNCTION START: clean_loyalty_points with dataframe shape={df.shape}")
+
+    if 'LoyaltyPoints' in df.columns:
+        # Ensure LoyaltyPoints are non-negative
+        negative_mask = df['LoyaltyPoints'] < 0
+        if negative_mask.any():
+            logger.info(f"Found {negative_mask.sum()} negative LoyaltyPoints, setting to 0")
+            df.loc[negative_mask, 'LoyaltyPoints'] = 0
+
+        # Cap extremely high loyalty points (potential data errors)
+        high_points_mask = df['LoyaltyPoints'] > 100000
+        if high_points_mask.any():
+            logger.info(
+                f"Found {high_points_mask.sum()} extremely high LoyaltyPoints, capping at 100000"
+            )
+            df.loc[high_points_mask, 'LoyaltyPoints'] = 100000
+
+        logger.info(
+            f"LoyaltyPoints range: {df['LoyaltyPoints'].min()} to {df['LoyaltyPoints'].max()}"
+        )
+        logger.info(f"Average LoyaltyPoints: {df['LoyaltyPoints'].mean():.1f}")
+
+    return df
+
+
+def clean_customer_segment(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean CustomerSegment column - standardize categories.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with cleaned CustomerSegment.
+    """
+    logger.info(f"FUNCTION START: clean_customer_segment with dataframe shape={df.shape}")
+
+    if 'CustomerSegment' in df.columns:
+        # Standardize segment names
+        segment_mapping = {
+            'PREMIUM': 'Premium',
+            'standard': 'Standard',
+            'NEW': 'New',
+            'new': 'New',
+            'BASIC': 'Basic',
+        }
+
+        df['CustomerSegment'] = df['CustomerSegment'].replace(segment_mapping)
+
+        # Log segment distribution
+        segment_counts = df['CustomerSegment'].value_counts()
+        logger.info(f"Customer segment distribution:\n{segment_counts}")
+
     return df
 
 
 def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Remove outliers based on thresholds.
-    This logic is very specific to the actual data and business rules.
+    Remove outliers based on customer data.
 
     Args:
         df (pd.DataFrame): Input DataFrame.
@@ -155,13 +272,63 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: remove_outliers with dataframe shape={df.shape}")
     initial_count = len(df)
 
-    # TODO: Define numeric columns and apply rules for outlier removal
-    # Example:
-    # df = df[(df['Age'] > 18) & (df['Age'] < 100)]
+    # Remove customers with invalid CustomerID (like 9999 from sales data)
+    if 'CustomerID' in df.columns:
+        invalid_customers = df[df['CustomerID'] == 9999]
+        if not invalid_customers.empty:
+            logger.info(f"Removed {len(invalid_customers)} rows with invalid CustomerID 9999")
+            df = df[df['CustomerID'] != 9999]
+
+    # Remove extremely high loyalty points outliers
+    if 'LoyaltyPoints' in df.columns:
+        q99 = df['LoyaltyPoints'].quantile(0.99)
+        extreme_loyalty_mask = df['LoyaltyPoints'] > q99
+        if extreme_loyalty_mask.any():
+            logger.info(
+                f"Removed {extreme_loyalty_mask.sum()} customers with extremely high loyalty points (> {q99})"
+            )
+            df = df[~extreme_loyalty_mask]
 
     removed_count = initial_count - len(df)
     logger.info(f"Removed {removed_count} outlier rows")
     logger.info(f"{len(df)} records remaining after removing outliers.")
+    return df
+
+
+def validate_customer_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Validate customer data integrity.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: Validated DataFrame.
+    """
+    logger.info(f"FUNCTION START: validate_customer_data with dataframe shape={df.shape}")
+
+    # Ensure CustomerID is unique
+    if 'CustomerID' in df.columns:
+        duplicate_customers = df.duplicated(subset=['CustomerID']).sum()
+        if duplicate_customers > 0:
+            logger.warning(f"Found {duplicate_customers} duplicate CustomerIDs")
+
+    # Validate CustomerSegment values
+    if 'CustomerSegment' in df.columns:
+        valid_segments = ['Premium', 'Standard', 'Basic', 'New', 'Unknown']
+        invalid_segments = df[~df['CustomerSegment'].isin(valid_segments)]
+        if not invalid_segments.empty:
+            logger.warning(f"Found {len(invalid_segments)} rows with invalid CustomerSegment")
+
+    # Validate LoyaltyPoints range
+    if 'LoyaltyPoints' in df.columns:
+        invalid_points = df[(df['LoyaltyPoints'] < 0) | (df['LoyaltyPoints'] > 100000)]
+        if not invalid_points.empty:
+            logger.warning(
+                f"Found {len(invalid_points)} rows with LoyaltyPoints outside valid range"
+            )
+
+    logger.info("Customer data validation completed")
     return df
 
 
@@ -207,21 +374,31 @@ def main() -> None:
     if changed_columns:
         logger.info(f"Cleaned column names: {', '.join(changed_columns)}")
 
+    # Add customer-related columns
+    df = add_customer_columns(df)
+
     # Remove duplicates
     df = remove_duplicates(df)
 
     # Handle missing values
     df = handle_missing_values(df)
 
+    # Clean the new columns
+    df = clean_loyalty_points(df)
+    df = clean_customer_segment(df)
+
     # Remove outliers
     df = remove_outliers(df)
+
+    # Validate data integrity
+    df = validate_customer_data(df)
 
     # Save prepared data
     save_prepared_data(df, output_file)
 
     logger.info("==================================")
-    logger.info(f"Original shape: {df.shape}")
-    logger.info(f"Cleaned shape:  {original_shape}")
+    logger.info(f"Original shape: {original_shape}")
+    logger.info(f"Cleaned shape:  {df.shape}")
     logger.info("==================================")
     logger.info("FINISHED prepare_customers_data.py")
     logger.info("==================================")

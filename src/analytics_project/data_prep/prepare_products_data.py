@@ -9,6 +9,7 @@ Tasks:
 - Handle missing values
 - Remove outliers
 - Ensure consistent formatting
+- Add and clean product-related columns (StockQuantity, ProductCategory)
 
 """
 
@@ -22,6 +23,7 @@ import sys
 
 # Import from external packages (requires a virtual environment)
 import pandas as pd
+import numpy as np
 
 # Ensure project root is in sys.path for local imports (now 3 parents are needed)
 sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
@@ -70,11 +72,9 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
     df = pd.read_csv(file_path)
     logger.info(f"Loaded dataframe with {len(df)} rows and {len(df.columns)} columns")
 
-    # TODO: OPTIONAL Add data profiling here to understand the dataset
-    # Suggestion: Log the datatypes of each column and the number of unique values
-    # Example:
-    # logger.info(f"Column datatypes: \n{df.dtypes}")
-    # logger.info(f"Number of unique values: \n{df.nunique()}")
+    # Data profiling
+    logger.info(f"Column datatypes: \n{df.dtypes}")
+    logger.info(f"Number of unique values: \n{df.nunique()}")
 
     return df
 
@@ -95,6 +95,56 @@ def save_prepared_data(df: pd.DataFrame, file_name: str) -> None:
     logger.info(f"Data saved to {file_path}")
 
 
+def add_product_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add product-related columns: StockQuantity and ProductCategory.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with new columns added.
+    """
+    logger.info(f"FUNCTION START: add_product_columns with dataframe shape={df.shape}")
+
+    # Add StockQuantity (numeric) - inventory levels
+    if 'StockQuantity' not in df.columns:
+        np.random.seed(42)  # For reproducible results
+        # Generate realistic stock quantities with some data quality issues
+        stock_quantities = np.random.choice(
+            [0, 5, 10, 25, 50, 100, 250, 500, 1000, -10, None],
+            size=len(df),
+            p=[0.05, 0.1, 0.15, 0.2, 0.15, 0.15, 0.1, 0.05, 0.03, 0.01, 0.01],
+        )
+        df['StockQuantity'] = stock_quantities
+        logger.info("Added StockQuantity column")
+
+    # Add ProductCategory (category) - product classification
+    if 'ProductCategory' not in df.columns:
+        np.random.seed(42)
+        # Generate product categories with some data quality issues
+        categories = np.random.choice(
+            [
+                'Electronics',
+                'Clothing',
+                'Home',
+                'Sports',
+                'ELECTRONICS',
+                'clothing',
+                'Home Goods',
+                'Sports Equipment',
+                None,
+            ],
+            size=len(df),
+            p=[0.25, 0.2, 0.2, 0.15, 0.05, 0.05, 0.05, 0.04, 0.01],
+        )
+        df['ProductCategory'] = categories
+        logger.info("Added ProductCategory column")
+
+    logger.info(f"New columns added: StockQuantity, ProductCategory")
+    return df
+
+
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     """
     Remove duplicate rows from the DataFrame.
@@ -108,11 +158,13 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: remove_duplicates with dataframe shape={df.shape}")
     initial_count = len(df)
 
-    # TODO: Consider which columns should be used to identify duplicates
-    # Example: For products, SKU or product code is typically unique
-    # So we could do something like this:
-    # df = df.drop_duplicates(subset=['product_code'])
-    df = df.drop_duplicates()
+    # Remove duplicates based on ProductID (assuming it's the unique identifier)
+    if 'ProductID' in df.columns:
+        df = df.drop_duplicates(subset=['ProductID'])
+        logger.info("Removed duplicates based on ProductID")
+    else:
+        df = df.drop_duplicates()
+        logger.info("Removed duplicates across all columns")
 
     removed_count = initial_count - len(df)
     logger.info(f"Removed {removed_count} duplicate rows")
@@ -123,7 +175,7 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
 def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     """
     Handle missing values by filling or dropping.
-    This logic is specific to the actual data and business rules.
+    Specific handling for product data with new columns.
 
     Args:
         df (pd.DataFrame): Input DataFrame.
@@ -134,19 +186,30 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: handle_missing_values with dataframe shape={df.shape}")
 
     # Log missing values by column before handling
-    # NA means missing or "not a number" - ask your AI for details
     missing_by_col = df.isna().sum()
     logger.info(f"Missing values by column before handling:\n{missing_by_col}")
 
-    # TODO: OPTIONAL - We can implement appropriate missing value handling
-    # specific to our data.
-    # For example: Different strategies may be needed for different columns
-    # USE YOUR COLUMN NAMES - these are just examples
-    # df['product_name'].fillna('Unknown Product', inplace=True)
-    # df['description'].fillna('', inplace=True)
-    # df['price'].fillna(df['price'].median(), inplace=True)
-    # df['category'].fillna(df['category'].mode()[0], inplace=True)
-    # df.dropna(subset=['product_code'], inplace=True)  # Remove rows without product code
+    # Handle missing ProductID - critical field, remove rows
+    if 'ProductID' in df.columns:
+        initial_count = len(df)
+        df = df[df['ProductID'].notna()]
+        removed_count = initial_count - len(df)
+        logger.info(f"Removed {removed_count} rows with missing ProductID")
+
+    # Handle missing StockQuantity - fill with 0 (out of stock)
+    if 'StockQuantity' in df.columns:
+        df['StockQuantity'] = df['StockQuantity'].fillna(0).astype(int)
+        logger.info("Filled missing StockQuantity with 0")
+
+    # Handle missing ProductCategory - fill with 'Uncategorized'
+    if 'ProductCategory' in df.columns:
+        df['ProductCategory'] = df['ProductCategory'].fillna('Uncategorized')
+        logger.info("Filled missing ProductCategory with 'Uncategorized'")
+
+    # Handle other potential missing values
+    # Example for other product columns:
+    # if 'ProductName' in df.columns:
+    #     df['ProductName'] = df['ProductName'].fillna('Unknown Product')
 
     # Log missing values by column after handling
     missing_after = df.isna().sum()
@@ -155,10 +218,77 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def clean_stock_quantity(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean StockQuantity column - handle invalid values.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with cleaned StockQuantity.
+    """
+    logger.info(f"FUNCTION START: clean_stock_quantity with dataframe shape={df.shape}")
+
+    if 'StockQuantity' in df.columns:
+        # Handle negative stock quantities - set to 0
+        negative_mask = df['StockQuantity'] < 0
+        if negative_mask.any():
+            logger.info(f"Found {negative_mask.sum()} negative StockQuantity values, setting to 0")
+            df.loc[negative_mask, 'StockQuantity'] = 0
+
+        # Handle extremely high stock quantities (potential data errors)
+        high_stock_mask = df['StockQuantity'] > 10000
+        if high_stock_mask.any():
+            logger.info(
+                f"Found {high_stock_mask.sum()} extremely high StockQuantity values, capping at 10000"
+            )
+            df.loc[high_stock_mask, 'StockQuantity'] = 10000
+
+        logger.info(
+            f"StockQuantity range: {df['StockQuantity'].min()} to {df['StockQuantity'].max()}"
+        )
+        logger.info(f"Average StockQuantity: {df['StockQuantity'].mean():.1f}")
+        logger.info(f"Products with zero stock: {(df['StockQuantity'] == 0).sum()}")
+
+    return df
+
+
+def clean_product_category(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean ProductCategory column - standardize categories.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with cleaned ProductCategory.
+    """
+    logger.info(f"FUNCTION START: clean_product_category with dataframe shape={df.shape}")
+
+    if 'ProductCategory' in df.columns:
+        # Standardize category names
+        category_mapping = {
+            'ELECTRONICS': 'Electronics',
+            'clothing': 'Clothing',
+            'Home Goods': 'Home',
+            'Sports Equipment': 'Sports',
+            'ELECTRIC': 'Electronics',
+            'CLOTHES': 'Clothing',
+        }
+
+        df['ProductCategory'] = df['ProductCategory'].replace(category_mapping)
+
+        # Log category distribution
+        category_counts = df['ProductCategory'].value_counts()
+        logger.info(f"Product category distribution:\n{category_counts}")
+
+    return df
+
+
 def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Remove outliers based on thresholds.
-    This logic is very specific to the actual data and business rules.
+    Remove outliers based on product data.
 
     Args:
         df (pd.DataFrame): Input DataFrame.
@@ -169,48 +299,34 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: remove_outliers with dataframe shape={df.shape}")
     initial_count = len(df)
 
-    # TODO: Identify numeric columns that might have outliers.
-    # Recommended - just use ranges based on reasonable data
-    # People should not be 22 feet tall, etc.
-    # OPTIONAL ADVANCED: Use IQR method to identify outliers in numeric columns
-    # Example:
-    # for col in ['price', 'weight', 'length', 'width', 'height']:
-    #     if col in df.columns and df[col].dtype in ['int64', 'float64']:
-    #         Q1 = df[col].quantile(0.25)
-    #         Q3 = df[col].quantile(0.75)
-    #         IQR = Q3 - Q1
-    #         lower_bound = Q1 - 1.5 * IQR
-    #         upper_bound = Q3 + 1.5 * IQR
-    #         df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
-    #         logger.info(f"Applied outlier removal to {col}: bounds [{lower_bound}, {upper_bound}]")
+    # Remove products with invalid ProductID
+    if 'ProductID' in df.columns:
+        # Check for obviously invalid product IDs (like 9999 from sales data)
+        invalid_products = df[df['ProductID'].astype(str).str.contains('9999|0000')]
+        if not invalid_products.empty:
+            logger.info(f"Removed {len(invalid_products)} rows with invalid ProductID")
+            df = df[~df['ProductID'].astype(str).str.contains('9999|0000', na=False)]
+
+    # Remove extreme stock quantity outliers using IQR method
+    if 'StockQuantity' in df.columns:
+        Q1 = df['StockQuantity'].quantile(0.25)
+        Q3 = df['StockQuantity'].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        stock_outliers = df[
+            (df['StockQuantity'] < lower_bound) | (df['StockQuantity'] > upper_bound)
+        ]
+        if not stock_outliers.empty:
+            logger.info(
+                f"Removed {len(stock_outliers)} products with extreme StockQuantity (IQR method)"
+            )
+            df = df[(df['StockQuantity'] >= lower_bound) & (df['StockQuantity'] <= upper_bound)]
 
     removed_count = initial_count - len(df)
     logger.info(f"Removed {removed_count} outlier rows")
     logger.info(f"{len(df)} records remaining after removing outliers.")
-    return df
-
-
-def standardize_formats(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Standardize the formatting of various columns.
-
-    Args:
-        df (pd.DataFrame): Input DataFrame.
-
-    Returns:
-        pd.DataFrame: DataFrame with standardized formatting.
-    """
-    logger.info(f"FUNCTION START: standardize_formats with dataframe shape={df.shape}")
-
-    # TODO: OPTIONAL ADVANCED Implement standardization for product data
-    # Suggestion: Consider standardizing text fields, units, and categorical variables
-    # Examples (update based on your column names and types):
-    # df['product_name'] = df['product_name'].str.title()  # Title case for product names
-    # df['category'] = df['category'].str.lower()  # Lowercase for categories
-    # df['price'] = df['price'].round(2)  # Round prices to 2 decimal places
-    # df['weight_unit'] = df['weight_unit'].str.upper()  # Uppercase units
-
-    logger.info("Completed standardizing formats")
     return df
 
 
@@ -226,14 +342,58 @@ def validate_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     logger.info(f"FUNCTION START: validate_data with dataframe shape={df.shape}")
 
-    # TODO: Implement data validation rules specific to products
-    # Suggestion: Check for valid values in critical fields
-    # Example:
-    # invalid_prices = df[df['price'] < 0].shape[0]
-    # logger.info(f"Found {invalid_prices} products with negative prices")
-    # df = df[df['price'] >= 0]
+    # Validate ProductID uniqueness
+    if 'ProductID' in df.columns:
+        duplicate_products = df.duplicated(subset=['ProductID']).sum()
+        if duplicate_products > 0:
+            logger.warning(f"Found {duplicate_products} duplicate ProductIDs")
 
-    logger.info("Data validation complete")
+    # Validate StockQuantity range
+    if 'StockQuantity' in df.columns:
+        invalid_stock = df[(df['StockQuantity'] < 0) | (df['StockQuantity'] > 10000)]
+        if not invalid_stock.empty:
+            logger.warning(
+                f"Found {len(invalid_stock)} products with StockQuantity outside valid range"
+            )
+
+    # Validate ProductCategory values
+    if 'ProductCategory' in df.columns:
+        valid_categories = ['Electronics', 'Clothing', 'Home', 'Sports', 'Uncategorized']
+        invalid_categories = df[~df['ProductCategory'].isin(valid_categories)]
+        if not invalid_categories.empty:
+            logger.warning(f"Found {len(invalid_categories)} products with invalid ProductCategory")
+
+    logger.info("Product data validation complete")
+    return df
+
+
+def standardize_formats(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Standardize the formatting of various columns.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with standardized formatting.
+    """
+    logger.info(f"FUNCTION START: standardize_formats with dataframe shape={df.shape}")
+
+    # Standardize text fields
+    if 'ProductName' in df.columns:
+        df['ProductName'] = df['ProductName'].str.title()
+        logger.info("Standardized ProductName to title case")
+
+    if 'ProductCategory' in df.columns:
+        df['ProductCategory'] = df['ProductCategory'].str.title()
+        logger.info("Standardized ProductCategory to title case")
+
+    # Ensure numeric fields are properly formatted
+    if 'StockQuantity' in df.columns:
+        df['StockQuantity'] = df['StockQuantity'].astype(int)
+        logger.info("Ensured StockQuantity is integer type")
+
+    logger.info("Completed standardizing formats")
     return df
 
 
@@ -256,9 +416,6 @@ def main() -> None:
     # Read raw data
     df = read_raw_data(input_file)
 
-    # Read raw data
-    df = read_raw_data(input_file)
-
     # Record original shape
     original_shape = df.shape
 
@@ -277,27 +434,34 @@ def main() -> None:
     if changed_columns:
         logger.info(f"Cleaned column names: {', '.join(changed_columns)}")
 
+    # Add product-related columns
+    df = add_product_columns(df)
+
     # Remove duplicates
     df = remove_duplicates(df)
 
     # Handle missing values
     df = handle_missing_values(df)
 
-    # TODO:Remove outliers
+    # Clean the new columns
+    df = clean_stock_quantity(df)
+    df = clean_product_category(df)
+
+    # Remove outliers
     df = remove_outliers(df)
 
-    # TODO: Validate data
+    # Validate data
     df = validate_data(df)
 
-    # TODO: Standardize formats
+    # Standardize formats
     df = standardize_formats(df)
 
     # Save prepared data
     save_prepared_data(df, output_file)
 
     logger.info("==================================")
-    logger.info(f"Original shape: {df.shape}")
-    logger.info(f"Cleaned shape:  {original_shape}")
+    logger.info(f"Original shape: {original_shape}")
+    logger.info(f"Cleaned shape:  {df.shape}")
     logger.info("==================================")
     logger.info("FINISHED prepare_products_data.py")
     logger.info("==================================")
