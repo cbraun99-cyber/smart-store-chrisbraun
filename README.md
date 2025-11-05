@@ -117,9 +117,22 @@ You should see:
 
 ### 3.5 Execute Data Processing Pipeline
 
+You have two options for processing your data - individual scripts or a unified pipeline:
+
+#### Option A: Unified Data Preparation (Recommended)
+`uv run python src/analytics_project/data_prep.py`
+
+**Features:**
+- Processes all 3 datasets in a single execution
+- Uses reusable `DataScrubber` class for consistent cleaning
+- Applies dataset-specific business logic and validation
+- Performs cross-dataset integrity checks
+- Provides comprehensive logging and summary reporting
+
+#### Option B: Individual Data Preparation Scripts
 Run the individual data preparation scripts to process CSV files and create cleaned datasets:
 
-#### Customer Data Preparation
+##### Customer Data Preparation
 `uv run python scripts/data_preparation/prepare_customers_data.py`
 
 **Features:**
@@ -129,7 +142,7 @@ Run the individual data preparation scripts to process CSV files and create clea
 - Cleans and validates loyalty points and customer segments
 - Removes outliers and invalid CustomerIDs
 
-#### Product Data Preparation
+##### Product Data Preparation
 `uv run python scripts/data_preparation/prepare_products_data.py`
 
 **Features:**
@@ -140,7 +153,7 @@ Run the individual data preparation scripts to process CSV files and create clea
 - Removes outliers using IQR method
 - Standardizes text formatting
 
-#### Sales Data Preparation
+##### Sales Data Preparation
 `uv run python scripts/data_preparation/prepare_sales_data.py`
 
 **Features:**
@@ -193,12 +206,17 @@ For the data processing pipeline to work, ensure your CSV files are placed in th
    - `products_data.csv`
    - `sales_data.csv`
 
-3. Run the individual data preparation scripts:
-   `uv run python scripts/data_preparation/prepare_customers_data.py`
-   `uv run python scripts/data_preparation/prepare_products_data.py`
-   `uv run python scripts/data_preparation/prepare_sales_data.py`
+3. Run the data preparation using either approach:
+   - **Unified**: `uv run python src/analytics_project/data_prep.py`
+   - **Individual**: Run each script separately as shown above
 
 ## Data Processing Features
+
+### Reusable DataScrubber Class
+- **Modular Design**: Encapsulates common data cleaning operations in a reusable class
+- **Consistent API**: Standardized methods for column cleaning, duplicate removal, missing value handling
+- **Extensible**: Easy to add new cleaning methods for specific business needs
+- **Validation**: Built-in data validation against configurable business rules
 
 ### Customer Data Processing
 - **Column Addition**: Adds LoyaltyPoints and CustomerSegment columns with realistic distributions
@@ -217,6 +235,37 @@ For the data processing pipeline to work, ensure your CSV files are placed in th
 - **Date Standardization**: Converts SaleDate to consistent YYYY-MM-DD format
 - **Business Logic**: Validates discount percentages (0-100%) and payment types
 - **Outlier Detection**: Removes negative sales and extreme sale amounts using statistical methods
+- **Data Integrity**: Cross-references customers and products to identify orphaned records
+
+## Project Architecture
+
+### File Structure
+
+```plaintext
+src/analytics_project/
+├── data_prep.py              # Unified data preparation orchestrator
+├── demo_module_*.py          # Demo modules
+└── utils_logger.py           # Logging utilities
+
+scripts/data_preparation/
+├── prepare_customers_data.py # Individual customer data preparation
+├── prepare_products_data.py  # Individual product data preparation
+└── prepare_sales_data.py     # Individual sales data preparation
+
+utils/
+├── logger.py                 # Logger configuration
+└── data_scrubber.py          # Reusable DataScrubber class
+
+data/
+├── raw/                      # Raw CSV files (input)
+└── prepared/                 # Cleaned CSV files (output)
+```
+
+### Key Components
+- **data_prep.py**: Main entry point that orchestrates the entire data preparation pipeline
+- **DataScrubber**: Reusable class that provides standardized data cleaning operations
+- **Individual Scripts**: Specialized scripts for dataset-specific processing logic
+- **Logger**: Consistent logging across all data processing components
 
 ## Troubleshooting
 
