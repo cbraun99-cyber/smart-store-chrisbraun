@@ -1,84 +1,101 @@
-productid,productname,category,unitprice,stockquantity,supplier,StockQuantity,ProductCategory
-2000,Electronics-Be,Electronics,969.31,45,TechCorp,25,Clothing
-2002,Office-Family,Clothing,866.0,88,FashionInc,100,Sports
-2003,Electronics-Training,Clothing,385.18,0,FashionInc,50,Home
-2004,Office-Where,Home,927.25,156,HomeGoods Co,10,Electronics
-2005,Office-Huge,Home,428.78,234,HomeGoods Co,10,Electronics
-2006,Office-Class,Clothing,198.0,67,FashionInc,5,Electronics
-2008,Electronics-Skin,Home,66.59,189,HomeGoods Co,50,Home
-2009,Office-Raise,Clothing,66.31,145,FashionInc,100,Sports
-2010,Electronics-Themselves,Clothing,77.84,98,FashionInc,0,Electronics
-2013,Office-Cultural,Home,935.36,167,HomeGoods Co,10,Electronics
-2014,Clothing-Eat,Home,246.3,278,HomeGoods Co,10,Electronics
-2015,Office-Itself,Clothing,674.97,45,FashionInc,10,Electronics
-2016,Home-He,Office,323.02,89,OfficePro,25,Clothing
-2017,Electronics-Feeling,Electronics,463.7,12,TechCorp,50,Home
-2018,Electronics-Nature,Electronics,542.26,67,TechCorp,25,Clothing
-2019,Home-History,Clothing,933.93,234,FashionInc,10,Clothing
-2020,Electronics-Share,Clothing,375.83,156,FashionInc,50,Home
-2021,Clothing-Skill,Office,835.41,78,OfficePro,5,Electronics
-2022,Home-Economy,Electronics,671.18,23,TechCorp,10,Clothing
-2023,Home-Yeah,Electronics,939.54,45,TechCorp,25,Clothing
-2024,Clothing-Paper,Home,124.27,189,HomeGoods Co,25,Home
-2025,Electronics-Assume,Clothing,279.62,0,FashionInc,100,Sports
-2026,Clothing-Use,Home,211.56,267,HomeGoods Co,10,Electronics
-2027,Home-Purpose,Office,258.61,145,OfficePro,50,Home
-2028,Electronics-Take,Electronics,637.94,34,TechCorp,50,Home
-2029,Home-Yourself,Electronics,13.51,456,TechCorp,0,Electronics
-2030,Clothing-First,Home,169.97,178,HomeGoods Co,50,Home
-2031,Office-Develop,Office,565.3,89,OfficePro,10,Electronics
-2032,Electronics-There,Electronics,945.6,23,TechCorp,5,Electronics
-2036,Electronics-Candidate,Home,217.98,278,HomeGoods Co,25,Clothing
-2037,Clothing-Meeting,Electronics,360.14,45,TechCorp,5,Electronics
-2038,Office-Soon,Clothing,926.51,120,FashionInc,100,Sports
-2039,Clothing-Need,Clothing,976.44,88,FashionInc,25,Clothing
-2040,Clothing-Determine,Office,34.54,156,OfficePro,5,Electronics
-2041,Home-Assume,Office,804.21,234,OfficePro,25,Home
-2042,Clothing-Lawyer,Home,167.61,67,HomeGoods Co,0,Electronics
-2044,Office-Society,Clothing,207.58,145,FashionInc,10,Clothing
-2045,Office-Next,Home,312.14,98,HomeGoods Co,100,Sports
-2046,Clothing-Worry,Clothing,33.43,56,FashionInc,25,Clothing
-2047,Clothing-Hair,Office,334.98,34,OfficePro,50,Home
-2048,Electronics-Candidate,Home,357.63,167,HomeGoods Co,50,Home
-2049,Office-Easy,Home,939.84,278,HomeGoods Co,10,Electronics
-2051,Home-Century,Electronics,117.32,120,TechCorp,100,Sports
-2054,Electronics-Above,Office,900.51,234,OfficePro,50,Home
-2056,Office-About,Electronics,524.72,189,TechCorp,5,Electronics
-2057,Clothing-Identify,Home,436.98,145,HomeGoods Co,10,Electronics
-2058,Home-Wear,Home,666.75,98,HomeGoods Co,0,Electronics
-2059,Electronics-Clear,Home,512.05,56,HomeGoods Co,25,Clothing
-2060,Office-Term,Home,408.38,34,HomeGoods Co,25,Clothing
-2061,Home-Quite,Clothing,199.92,167,FashionInc,10,Clothing
-2063,Home-Good,Office,552.46,45,OfficePro,25,Clothing
-2064,Electronics-Stop,Home,294.04,120,HomeGoods Co,10,Clothing
-2065,Office-Animal,Home,470.34,88,HomeGoods Co,50,Home
-2066,Office-Occur,Clothing,516.06,156,FashionInc,5,Electronics
-2068,Home-Read,Electronics,820.24,67,TechCorp,5,Electronics
-2069,Clothing-Garden,Home,232.39,189,HomeGoods Co,0,Sports
-2070,Clothing-About,Clothing,34.18,145,FashionInc,100,Sports
-2071,Clothing-Success,Office,615.16,98,OfficePro,10,Electronics
-2072,Electronics-Become,Office,420.3,56,OfficePro,0,Electronics
-2074,Clothing-Strong,Clothing,659.5,167,FashionInc,100,Sports
-2075,Electronics-Letter,Electronics,780.64,278,TechCorp,100,Sports
-2076,Clothing-Affect,Clothing,806.07,45,FashionInc,100,Sports
-2077,Office-Ball,Electronics,561.83,120,TechCorp,5,Electronics
-2078,Electronics-Film,Office,142.01,88,OfficePro,25,Clothing
-2079,Office-Who,Home,950.54,156,HomeGoods Co,5,Electronics
-2081,Office-Light,Clothing,746.22,67,FashionInc,50,Home
-2082,Office-Figure,Office,266.6,189,OfficePro,25,Clothing
-2083,Clothing-Cut,Home,768.16,145,HomeGoods Co,5,Electronics
-2084,Office-Stuff,Clothing,281.85,98,FashionInc,25,Clothing
-2085,Electronics-Officer,Home,242.15,56,HomeGoods Co,25,Clothing
-2086,Home-Of,Home,894.1,34,HomeGoods Co,100,Sports
-2087,Electronics-Rather,Clothing,159.32,167,FashionInc,50,Home
-2089,Electronics-Action,Office,413.52,45,OfficePro,25,Home
-2090,Office-Staff,Office,71.64,120,OfficePro,5,Electronics
-2091,Office-Mrs,Office,905.79,88,OfficePro,100,Sports
-2092,Electronics-Add,Office,482.21,156,OfficePro,100,Sports
-2093,Home-Real,Home,755.94,234,HomeGoods Co,50,Home
-2094,Office-Fight,Clothing,493.35,67,FashionInc,100,Sports
-2095,Home-Seem,Office,490.79,189,OfficePro,25,Home
-2096,Office-Discuss,Home,672.18,145,HomeGoods Co,50,Home
-2097,Office-Recent,Clothing,842.1,98,FashionInc,25,Clothing
-2098,Clothing-Trouble,Electronics,907.86,56,TechCorp,0,Electronics
-2099,Electronics-Several,Electronics,646.32,34,TechCorp,5,Electronics
+productid,productname,category,unitprice,stockquantity,supplier,productcategory
+2000,Electronics-Be,Electronics,969.31,45,TechCorp,Clothing
+2001,Electronics-Be,Clothing,412.35,120,FashionInc,Sports
+2002,Office-Family,Clothing,866.0,88,FashionInc,Home
+2003,Electronics-Training,Clothing,385.18,0,FashionInc,Home
+2004,Office-Where,Home,927.25,156,HomeGoods Co,Electronics
+2005,Office-Huge,Home,428.78,234,HomeGoods Co,Electronics
+2006,Office-Class,Clothing,198.0,67,FashionInc,Electronics
+2007,Clothing-Over,Electronics,583.39,23,TechCorp,Sports
+2008,Electronics-Skin,Home,66.59,189,HomeGoods Co,Home
+2009,Office-Raise,Clothing,66.31,145,FashionInc,Home
+2010,Electronics-Themselves,Clothing,77.84,98,FashionInc,Electronics
+2011,Electronics-Religious,Clothing,409.74,56,FashionInc,Sports
+2012,Clothing-Artist,Electronics,623.19,34,TechCorp,Sports
+2013,Office-Cultural,Home,935.36,167,HomeGoods Co,Electronics
+2014,Clothing-Eat,Home,246.3,278,HomeGoods Co,Electronics
+2015,Office-Itself,Clothing,674.97,45,FashionInc,Electronics
+2016,Home-He,Office,323.02,89,OfficePro,Clothing
+2017,Electronics-Feeling,Electronics,463.7,12,TechCorp,Clothing
+2018,Electronics-Nature,Electronics,542.26,67,TechCorp,Clothing
+2019,Home-History,Clothing,933.93,234,FashionInc,Electronics
+2020,Electronics-Share,Clothing,375.83,156,FashionInc,Home
+2021,Clothing-Skill,Office,835.41,78,OfficePro,Electronics
+2022,Home-Economy,Electronics,671.18,23,TechCorp,Electronics
+2023,Home-Yeah,Electronics,939.54,45,TechCorp,Clothing
+2024,Clothing-Paper,Home,124.27,189,HomeGoods Co,Clothing
+2025,Electronics-Assume,Clothing,279.62,0,FashionInc,Home
+2026,Clothing-Use,Home,211.56,267,HomeGoods Co,Electronics
+2027,Home-Purpose,Office,258.61,145,OfficePro,Clothing
+2028,Electronics-Take,Electronics,637.94,34,TechCorp,Home
+2029,Home-Yourself,Electronics,13.51,456,TechCorp,Electronics
+2030,Clothing-First,Home,169.97,178,HomeGoods Co,Home
+2031,Office-Develop,Office,565.3,89,OfficePro,Electronics
+2032,Electronics-There,Electronics,945.6,23,TechCorp,Electronics
+2033,Clothing-Argue,Electronics,836.25,67,TechCorp,Sports
+2034,Clothing-Feel,Office,136.17,234,OfficePro,Sports
+2035,Home-According,Home,899.99,156,HomeGoods Co,Sports
+2036,Electronics-Candidate,Home,217.98,278,HomeGoods Co,Clothing
+2037,Clothing-Meeting,Electronics,360.14,45,TechCorp,Electronics
+2038,Office-Soon,Clothing,926.51,120,FashionInc,Home
+2039,Clothing-Need,Clothing,976.44,88,FashionInc,Clothing
+2040,Clothing-Determine,Office,34.54,156,OfficePro,Electronics
+2041,Home-Assume,Office,804.21,234,OfficePro,Clothing
+2042,Clothing-Lawyer,Home,167.61,67,HomeGoods Co,Electronics
+2043,Electronics-Practice,Office,873.45,189,OfficePro,Sports
+2044,Office-Society,Clothing,207.58,145,FashionInc,Electronics
+2045,Office-Next,Home,312.14,98,HomeGoods Co,Home
+2046,Clothing-Worry,Clothing,33.43,56,FashionInc,Clothing
+2047,Clothing-Hair,Office,334.98,34,OfficePro,Clothing
+2048,Electronics-Candidate,Home,357.63,167,HomeGoods Co,Clothing
+2049,Office-Easy,Home,939.84,278,HomeGoods Co,Electronics
+2050,Electronics-Young,Home,186.78,45,HomeGoods Co,Sports
+2051,Home-Century,Electronics,117.32,120,TechCorp,Home
+2052,Office-Year,Home,731.26,88,HomeGoods Co,Sports
+2053,Home-Ground,Office,610.15,156,OfficePro,Sports
+2054,Electronics-Above,Office,900.51,234,OfficePro,Home
+2055,Clothing-Politics,Home,53.94,67,HomeGoods Co,Sports
+2056,Office-About,Electronics,524.72,189,TechCorp,Electronics
+2057,Clothing-Identify,Home,436.98,145,HomeGoods Co,Electronics
+2058,Home-Wear,Home,666.75,98,HomeGoods Co,Electronics
+2059,Electronics-Clear,Home,512.05,56,HomeGoods Co,Clothing
+2060,Office-Term,Home,408.38,34,HomeGoods Co,Clothing
+2061,Home-Quite,Clothing,199.92,167,FashionInc,Electronics
+2062,Office-Receive,Clothing,619.36,278,FashionInc,Sports
+2063,Home-Good,Office,552.46,45,OfficePro,Clothing
+2064,Electronics-Stop,Home,294.04,120,HomeGoods Co,Electronics
+2065,Office-Animal,Home,470.34,88,HomeGoods Co,Clothing
+2066,Office-Occur,Clothing,516.06,156,FashionInc,Electronics
+2067,Clothing-Remain,Electronics,290.95,234,TechCorp,Sports
+2068,Home-Read,Electronics,820.24,67,TechCorp,Electronics
+2069,Clothing-Garden,Home,232.39,189,HomeGoods Co,Sports
+2070,Clothing-About,Clothing,34.18,145,FashionInc,Home
+2071,Clothing-Success,Office,615.16,98,OfficePro,Electronics
+2072,Electronics-Become,Office,420.3,56,OfficePro,Electronics
+2073,Clothing-Executive,Office,499.43,34,OfficePro,Sports
+2074,Clothing-Strong,Clothing,659.5,167,FashionInc,Home
+2075,Electronics-Letter,Electronics,780.64,278,TechCorp,Home
+2076,Clothing-Affect,Clothing,806.07,45,FashionInc,Home
+2077,Office-Ball,Electronics,561.83,120,TechCorp,Electronics
+2078,Electronics-Film,Office,142.01,88,OfficePro,Clothing
+2079,Office-Who,Home,950.54,156,HomeGoods Co,Electronics
+2080,Office-Doctor,Office,832.26,234,OfficePro,Sports
+2081,Office-Light,Clothing,746.22,67,FashionInc,Home
+2082,Office-Figure,Office,266.6,189,OfficePro,Clothing
+2083,Clothing-Cut,Home,768.16,145,HomeGoods Co,Electronics
+2084,Office-Stuff,Clothing,281.85,98,FashionInc,Clothing
+2085,Electronics-Officer,Home,242.15,56,HomeGoods Co,Clothing
+2086,Home-Of,Home,894.1,34,HomeGoods Co,Home
+2087,Electronics-Rather,Clothing,159.32,167,FashionInc,Home
+2088,Office-Evening,Clothing,709.35,278,FashionInc,Sports
+2089,Electronics-Action,Office,413.52,45,OfficePro,Clothing
+2090,Office-Staff,Office,71.64,120,OfficePro,Electronics
+2091,Office-Mrs,Office,905.79,88,OfficePro,Home
+2092,Electronics-Add,Office,482.21,156,OfficePro,Home
+2093,Home-Real,Home,755.94,234,HomeGoods Co,Home
+2094,Office-Fight,Clothing,493.35,67,FashionInc,Home
+2095,Home-Seem,Office,490.79,189,OfficePro,Clothing
+2096,Office-Discuss,Home,672.18,145,HomeGoods Co,Clothing
+2097,Office-Recent,Clothing,842.1,98,FashionInc,Clothing
+2098,Clothing-Trouble,Electronics,907.86,56,TechCorp,Electronics
+2099,Electronics-Several,Electronics,646.32,34,TechCorp,Electronics
