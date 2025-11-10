@@ -170,7 +170,20 @@ Run the individual data preparation scripts to process CSV files and create clea
 - Validation reports and data quality metrics
 - Cleaned CSV files saved to `data/prepared/` directory
 
-### 3.6 Git add-commit-push to GitHub
+### 3.6 Execute Data Warehouse ETL Pipeline
+
+After preparing your data, build the data warehouse using the ETL script:
+
+`uv run python src/analytics_project/etl_to_dw.py`
+
+**Features:**
+- Creates star schema data warehouse in SQLite
+- Loads cleaned data from `data/prepared/` directory
+- Establishes foreign key relationships between tables
+- Performs data validation and quality checks
+- Outputs verification statistics
+
+### 3.7 Git add-commit-push to GitHub
 
 Anytime we make working changes to code is a good time to git add-commit-push to GitHub.
 
@@ -184,7 +197,7 @@ Anytime we make working changes to code is a good time to git add-commit-push to
 
 This will trigger the GitHub Actions workflow and publish your documentation via GitHub Pages.
 
-### 3.7 Modify and Debug
+### 3.8 Modify and Debug
 
 With a working version safe in GitHub, start making changes to the code.
 
@@ -194,12 +207,122 @@ Each time forward progress is made, remember to git add-commit-push.
 
 ---
 
+## Data Warehouse Implementation (P4)
+
+### Design Decisions
+
+**Schema Type**: Star Schema
+**Rationale**: Simplest and most efficient for analytical queries, minimizes join complexity
+**Fact Table**: `sales` - contains transactional business metrics
+**Dimension Tables**: `customers`, `products` - provide descriptive context
+
+**Key Design Principles**:
+- Denormalized structure for query performance
+- Clear primary and foreign key relationships
+- Business-focused column selection
+
+### Schema Definition
+
+**Customers Dimension Table**:
+- customerid (TEXT, Primary Key)
+- name (TEXT)
+- region (TEXT)
+- joindate (TEXT)
+- loyaltypoints (REAL)
+- customertier (TEXT)
+- customersegment (TEXT)
+
+**Products Dimension Table**:
+- productid (TEXT, Primary Key)
+- productname (TEXT)
+- category (TEXT)
+- unitprice (REAL)
+- stockquantity (INTEGER)
+- supplier (TEXT)
+- productcategory (TEXT)
+
+**Sales Fact Table**:
+- transactionid (INTEGER, Primary Key)
+- saledate (TEXT)
+- customerid (TEXT, Foreign Key)
+- productid (TEXT, Foreign Key)
+- storeid (TEXT)
+- campaignid (TEXT)
+- saleamount (REAL)
+- discountpercent (REAL)
+- paymenttype (TEXT)
+
+### Implementation Details
+
+**ETL Script**: `src/analytics_project/etl_to_dw.py`
+- Creates database schema
+- Loads data from prepared CSV files
+- Establishes referential integrity
+- Performs data validation
+
+**Database Location**: `data/dw/smart_sales.db`
+
+**Data Sources**:
+- `data/prepared/customers_prepared.csv`
+- `data/prepared/products_prepared.csv`
+- `data/prepared/sales_prepared.csv`
+
+### Business Value
+
+**Customer Analytics**:
+- Customer segmentation by region and loyalty
+- Customer lifetime value analysis
+- Regional sales performance
+
+**Product Analytics**:
+- Sales performance by product category
+- Pricing and discount strategy analysis
+- Supplier performance tracking
+
+**Sales Analytics**:
+- Campaign effectiveness measurement
+- Payment method preferences
+- Seasonal sales trends
+
+### Challenges & Solutions
+
+1. **Data Type Compatibility**: Used TEXT for dates and proper REAL/INTEGER types for numeric data in SQLite
+2. **Column Naming**: Maintained camelCase from prepared data files for consistency
+3. **Date Formatting**: Converted to ISO 8601 format (YYYY-MM-DD) for proper sorting
+4. **Missing Values**: Implemented robust handling for null values in campaign IDs and payment types
+5. **Data Integrity**: Established foreign key constraints between fact and dimension tables
+
+### Project Structure
+
+The data warehouse integrates with the existing project structure:
+
+- **data/dw/**: Contains the SQLite database file
+- **data/prepared/**: Source CSV files for ETL process
+- **src/analytics_project/etl_to_dw.py**: Main ETL script
+- **src/analytics_project/data_prep.py**: Data preparation script
+
+### Usage Examples
+
+**Sample Analytical Queries**:
+
+- **Sales by region and product category**: Analyze total sales across different regions and product categories
+- **Customer loyalty analysis**: Examine average loyalty points by customer tier and segment
+- **Campaign performance**: Measure sales impact of different marketing campaigns
+- **Product performance**: Track sales by product category and supplier
+
+### Execution Commands
+
+1. Prepare data: `uv run python src/analytics_project/data_prep.py`
+2. Build warehouse: `uv run python src/analytics_project/etl_to_dw.py`
+
+---
+
 ## Data Files Preparation
 
 For the data processing pipeline to work, ensure your CSV files are placed in the correct location:
 
 1. Create the data directory structure:
-   `mkdir -p data/raw data/prepared`
+   `mkdir -p data/raw data/prepared data/dw`
 
 2. Place your CSV files in `data/raw/` with these expected names:
    - `customers_data.csv`
@@ -210,62 +333,8 @@ For the data processing pipeline to work, ensure your CSV files are placed in th
    - **Unified**: `uv run python src/analytics_project/data_prep.py`
    - **Individual**: Run each script separately as shown above
 
-## Data Processing Features
-
-### Reusable DataScrubber Class
-- **Modular Design**: Encapsulates common data cleaning operations in a reusable class
-- **Consistent API**: Standardized methods for column cleaning, duplicate removal, missing value handling
-- **Extensible**: Easy to add new cleaning methods for specific business needs
-- **Validation**: Built-in data validation against configurable business rules
-
-### Customer Data Processing
-- **Column Addition**: Adds LoyaltyPoints and CustomerSegment columns with realistic distributions
-- **Data Cleaning**: Handles missing values, removes duplicates, and standardizes segment names
-- **Validation**: Ensures CustomerID uniqueness and valid loyalty point ranges
-- **Outlier Removal**: Filters extreme loyalty points and invalid customer IDs
-
-### Product Data Processing
-- **Column Addition**: Adds StockQuantity and ProductCategory columns with realistic values
-- **Data Cleaning**: Standardizes category names, handles negative stock quantities
-- **Quality Control**: Uses IQR method for outlier detection in stock levels
-- **Format Standardization**: Converts text to title case and ensures proper data types
-
-### Sales Data Processing
-- **Numeric Cleaning**: Converts all numeric columns to proper types, handles conversion errors
-- **Date Standardization**: Converts SaleDate to consistent YYYY-MM-DD format
-- **Business Logic**: Validates discount percentages (0-100%) and payment types
-- **Outlier Detection**: Removes negative sales and extreme sale amounts using statistical methods
-- **Data Integrity**: Cross-references customers and products to identify orphaned records
-
-## Project Architecture
-
-### File Structure
-
-```plaintext
-src/analytics_project/
-├── data_prep.py              # Unified data preparation orchestrator
-├── demo_module_*.py          # Demo modules
-└── utils_logger.py           # Logging utilities
-
-scripts/data_preparation/
-├── prepare_customers_data.py # Individual customer data preparation
-├── prepare_products_data.py  # Individual product data preparation
-└── prepare_sales_data.py     # Individual sales data preparation
-
-utils/
-├── logger.py                 # Logger configuration
-└── data_scrubber.py          # Reusable DataScrubber class
-
-data/
-├── raw/                      # Raw CSV files (input)
-└── prepared/                 # Cleaned CSV files (output)
-```
-
-### Key Components
-- **data_prep.py**: Main entry point that orchestrates the entire data preparation pipeline
-- **DataScrubber**: Reusable class that provides standardized data cleaning operations
-- **Individual Scripts**: Specialized scripts for dataset-specific processing logic
-- **Logger**: Consistent logging across all data processing components
+4. Build the data warehouse:
+   `uv run python src/analytics_project/etl_to_dw.py`
 
 ## Troubleshooting
 
@@ -276,5 +345,12 @@ If any data preparation script fails, check:
 - Are there any error messages in the terminal or log files?
 - Did you run `uv sync` to ensure all dependencies are installed?
 - Check individual script logs for specific data quality issues
+
+If the ETL script fails, verify:
+
+- Are the prepared CSV files in `data/prepared/` directory?
+- Is the data warehouse directory structure created?
+- Are there any foreign key constraint violations?
+- Check the verification output for data loading issues
 
 View detailed logs for each script execution to identify and resolve data quality problems.
