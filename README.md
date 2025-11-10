@@ -2,18 +2,62 @@
 
 > Use this repo to start a professional Python project.
 
-- Additional information: <https://github.com/denisecase/pro-analytics-02>
-- Project organization: [STRUCTURE](./STRUCTURE.md)
-- Build professional skills:
-  - **Environment Management**: Every project in isolation
-  - **Code Quality**: Automated checks for fewer bugs
-  - **Documentation**: Use modern project documentation tools
-  - **Testing**: Prove your code works
-  - **Version Control**: Collaborate professionally
+![Python](https://img.shields.io/badge/python-3.12-blue.svg)
+![UV](https://img.shields.io/badge/package_manager-uv-orange.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![CI/CD](https://img.shields.io/badge/CI/CD-GitHub_Actions-blue.svg)
+
+## 🚀 Quick Start
+
+```bash
+# Clone and setup
+git clone <your-repo-url>
+cd pro-analytics-02-python-starter
+uv venv
+uv sync --extra dev --extra docs --upgrade
+uv run pre-commit install
+
+# Process data and build warehouse
+uv run python src/analytics_project/data_prep.py
+uv run python src/analytics_project/etl_to_dw.py
+```
+
+## ✨ Features
+
+**Core Capabilities:**
+- 🏗️ **Environment Management**: UV, Virtual Environments
+- ✅ **Code Quality**: Ruff, pre-commit, pytest
+- 📚 **Documentation**: MkDocs, GitHub Pages
+- 📊 **Data Processing**: Pandas, Data Validation
+- 🗃️ **Data Warehouse**: SQLite, Star Schema
+- 🔄 **CI/CD**: GitHub Actions
+
+**Professional Skills Development:**
+- **Environment Management**: Every project in isolation
+- **Code Quality**: Automated checks for fewer bugs
+- **Documentation**: Use modern project documentation tools
+- **Testing**: Prove your code works
+- **Version Control**: Collaborate professionally
 
 ---
 
-## WORKFLOW 1. Set Up Your Machine
+## 📋 Prerequisites
+
+- Python 3.12+
+- [UV](https://github.com/astral-sh/uv) package manager
+- Git
+- VS Code (recommended)
+
+## 📚 Documentation
+
+- [Project Structure](./STRUCTURE.md)
+- [Machine Setup](./SET_UP_MACHINE.md)
+- [Project Setup](./SET_UP_PROJECT.md)
+- Additional information: <https://github.com/denisecase/pro-analytics-02>
+
+---
+
+## 🔧 WORKFLOW 1. Set Up Your Machine
 
 Proper setup is critical.
 Complete each step in the following guide and verify carefully.
@@ -22,7 +66,7 @@ Complete each step in the following guide and verify carefully.
 
 ---
 
-## WORKFLOW 2. Set Up Your Project
+## 🛠️ WORKFLOW 2. Set Up Your Project
 
 After verifying your machine is set up, set up a new Python project by copying this template.
 Complete each step in the following guide.
@@ -31,21 +75,27 @@ Complete each step in the following guide.
 
 It includes the critical commands to set up your local environment (and activate it):
 
-`uv venv`
-`uv python pin 3.12`
-`uv sync --extra dev --extra docs --upgrade`
-`uv run pre-commit install`
-`uv run python --version`
+```bash
+uv venv
+uv python pin 3.12
+uv sync --extra dev --extra docs --upgrade
+uv run pre-commit install
+uv run python --version
+```
 
 **Windows (PowerShell):**
-`.\.venv\Scripts\activate`
+```powershell
+.\.venv\Scripts\activate
+```
 
 **macOS / Linux / WSL:**
-`source .venv/bin/activate`
+```bash
+source .venv/bin/activate
+```
 
 ---
 
-## WORKFLOW 3. Daily Workflow
+## 📊 WORKFLOW 3. Daily Workflow
 
 Please ensure that the prior steps have been verified before continuing.
 When working on a project, we open just that project in VS Code.
@@ -54,7 +104,9 @@ When working on a project, we open just that project in VS Code.
 
 Always start with `git pull` to check for any changes made to the GitHub repo.
 
-`git pull`
+```bash
+git pull
+```
 
 ### 3.2 Run Checks as You Work
 
@@ -70,14 +122,16 @@ This mirrors real work where we typically:
 
 In VS Code, open your repository, then open a terminal (Terminal / New Terminal) and run the following commands one at a time to check the code.
 
-`uv sync --extra dev --extra docs --upgrade`
-`uv cache clean`
-`git add .`
-`uvx ruff check --fix`
-`uvx pre-commit autoupdate`
-`uv run pre-commit run --all-files`
-`git add .`
-`uv run pytest`
+```bash
+uv sync --extra dev --extra docs --upgrade
+uv cache clean
+git add .
+uvx ruff check --fix
+uvx pre-commit autoupdate
+uv run pre-commit run --all-files
+git add .
+uv run pytest
+```
 
 NOTE: The second `git add .` ensures any automatic fixes made by Ruff or pre-commit are included before testing or committing.
 
@@ -90,8 +144,10 @@ For fully reproducible results, or when you need to use the local `.venv`, use `
 
 Make sure you have current doc dependencies, then build your docs, fix any errors, and serve them locally to test.
 
-`uv run mkdocs build --strict`
-`uv run mkdocs serve`
+```bash
+uv run mkdocs build --strict
+uv run mkdocs serve
+```
 
 - After running the serve command, the local URL of the docs will be provided. To open the site, press **CTRL and click** the provided link (at the same time) to view the documentation. On a Mac, use **CMD and click**.
 - Press **CTRL c** (at the same time) to stop the hosting process.
@@ -103,10 +159,12 @@ Run the demo Python modules to confirm everything is working.
 
 In VS Code terminal, run:
 
-`uv run python -m analytics_project.demo_module_basics`
-`uv run python -m analytics_project.demo_module_languages`
-`uv run python -m analytics_project.demo_module_stats`
-`uv run python -m analytics_project.demo_module_viz`
+```bash
+uv run python -m analytics_project.demo_module_basics
+uv run python -m analytics_project.demo_module_languages
+uv run python -m analytics_project.demo_module_stats
+uv run python -m analytics_project.demo_module_viz
+```
 
 You should see:
 
@@ -120,7 +178,9 @@ You should see:
 You have two options for processing your data - individual scripts or a unified pipeline:
 
 #### Option A: Unified Data Preparation (Recommended)
-`uv run python src/analytics_project/data_prep.py`
+```bash
+uv run python src/analytics_project/data_prep.py
+```
 
 **Features:**
 - Processes all 3 datasets in a single execution
@@ -130,10 +190,12 @@ You have two options for processing your data - individual scripts or a unified 
 - Provides comprehensive logging and summary reporting
 
 #### Option B: Individual Data Preparation Scripts
-Run the individual data preparation scripts to process CSV files and create cleaned datasets:
+Run the individual data preparation scripts to process CSV files and created cleaned datasets:
 
 ##### Customer Data Preparation
-`uv run python scripts/data_preparation/prepare_customers_data.py`
+```bash
+uv run python scripts/data_preparation/prepare_customers_data.py
+```
 
 **Features:**
 - Adds customer-related columns (LoyaltyPoints, CustomerSegment)
@@ -143,7 +205,9 @@ Run the individual data preparation scripts to process CSV files and create clea
 - Removes outliers and invalid CustomerIDs
 
 ##### Product Data Preparation
-`uv run python scripts/data_preparation/prepare_products_data.py`
+```bash
+uv run python scripts/data_preparation/prepare_products_data.py
+```
 
 **Features:**
 - Adds product-related columns (StockQuantity, ProductCategory)
@@ -154,7 +218,9 @@ Run the individual data preparation scripts to process CSV files and create clea
 - Standardizes text formatting
 
 ##### Sales Data Preparation
-`uv run python scripts/data_preparation/prepare_sales_data.py`
+```bash
+uv run python scripts/data_preparation/prepare_sales_data.py
+```
 
 **Features:**
 - Cleans numeric columns (SaleAmount, DiscountPercent, etc.)
@@ -174,7 +240,9 @@ Run the individual data preparation scripts to process CSV files and create clea
 
 After preparing your data, build the data warehouse using the ETL script:
 
-`uv run python src/analytics_project/etl_to_dw.py`
+```bash
+uv run python src/analytics_project/etl_to_dw.py
+```
 
 **Features:**
 - Creates star schema data warehouse in SQLite
@@ -191,9 +259,11 @@ Anytime we make working changes to code is a good time to git add-commit-push to
 2. Commit your changes with a useful message in quotes.
 3. Push your work to GitHub.
 
-`git add .`
-`git commit -m "describe your change in quotes"`
-`git push -u origin main`
+```bash
+git add .
+git commit -m "describe your change in quotes"
+git push -u origin main
+```
 
 This will trigger the GitHub Actions workflow and publish your documentation via GitHub Pages.
 
@@ -207,7 +277,7 @@ Each time forward progress is made, remember to git add-commit-push.
 
 ---
 
-## Data Warehouse Implementation (P4)
+## 🗃️ Data Warehouse Implementation
 
 ### Design Decisions
 
@@ -216,14 +286,14 @@ Each time forward progress is made, remember to git add-commit-push.
 **Fact Table**: `sales` - contains transactional business metrics
 **Dimension Tables**: `customers`, `products` - provide descriptive context
 
-**Key Design Principles**:
+**Key Design Principles:**
 - Denormalized structure for query performance
 - Clear primary and foreign key relationships
 - Business-focused column selection
 
 ### Schema Definition
 
-**Customers Dimension Table**:
+**Customers Dimension Table:**
 - customerid (TEXT, Primary Key)
 - name (TEXT)
 - region (TEXT)
@@ -232,7 +302,7 @@ Each time forward progress is made, remember to git add-commit-push.
 - customertier (TEXT)
 - customersegment (TEXT)
 
-**Products Dimension Table**:
+**Products Dimension Table:**
 - productid (TEXT, Primary Key)
 - productname (TEXT)
 - category (TEXT)
@@ -241,7 +311,7 @@ Each time forward progress is made, remember to git add-commit-push.
 - supplier (TEXT)
 - productcategory (TEXT)
 
-**Sales Fact Table**:
+**Sales Fact Table:**
 - transactionid (INTEGER, Primary Key)
 - saledate (TEXT)
 - customerid (TEXT, Foreign Key)
@@ -262,35 +332,27 @@ Each time forward progress is made, remember to git add-commit-push.
 
 **Database Location**: `data/dw/smart_sales.db`
 
-**Data Sources**:
+**Data Sources:**
 - `data/prepared/customers_prepared.csv`
 - `data/prepared/products_prepared.csv`
 - `data/prepared/sales_prepared.csv`
 
 ### Business Value
 
-**Customer Analytics**:
+**Customer Analytics:**
 - Customer segmentation by region and loyalty
 - Customer lifetime value analysis
 - Regional sales performance
 
-**Product Analytics**:
+**Product Analytics:**
 - Sales performance by product category
 - Pricing and discount strategy analysis
 - Supplier performance tracking
 
-**Sales Analytics**:
+**Sales Analytics:**
 - Campaign effectiveness measurement
 - Payment method preferences
 - Seasonal sales trends
-
-### Challenges & Solutions
-
-1. **Data Type Compatibility**: Used TEXT for dates and proper REAL/INTEGER types for numeric data in SQLite
-2. **Column Naming**: Maintained camelCase from prepared data files for consistency
-3. **Date Formatting**: Converted to ISO 8601 format (YYYY-MM-DD) for proper sorting
-4. **Missing Values**: Implemented robust handling for null values in campaign IDs and payment types
-5. **Data Integrity**: Established foreign key constraints between fact and dimension tables
 
 ### File Structure
 
@@ -316,29 +378,6 @@ data/
 └── raw/                      # Raw CSV files (input)
 ```
 
-### Project Architecture
-
-**Key Components**:
-- **etl_to_dw.py**: Main ETL pipeline that creates and populates the data warehouse
-- **data_prep.py**: Main entry point that orchestrates the entire data preparation pipeline
-- **DataScrubber**: Reusable class that provides standardized data cleaning operations
-- **Individual Scripts**: Specialized scripts for dataset-specific processing logic
-- **Logger**: Consistent logging across all data processing components
-
-**Data Flow**:
-1. Raw CSV files → Data Preparation → Cleaned CSV files
-2. Cleaned CSV files → ETL Process → Data Warehouse
-3. Data Warehouse → Analytical Queries → Business Insights
-
-### Usage Examples
-
-**Sample Analytical Queries**:
-
-- **Sales by region and product category**: Analyze total sales across different regions and product categories
-- **Customer loyalty analysis**: Examine average loyalty points by customer tier and segment
-- **Campaign performance**: Measure sales impact of different marketing campaigns
-- **Product performance**: Track sales by product category and supplier
-
 ### Execution Commands
 
 1. Prepare data: `uv run python src/analytics_project/data_prep.py`
@@ -346,12 +385,14 @@ data/
 
 ---
 
-## Data Files Preparation
+## 📁 Data Files Preparation
 
 For the data processing pipeline to work, ensure your CSV files are placed in the correct location:
 
 1. Create the data directory structure:
-   `mkdir -p data/raw data/prepared data/dw`
+   ```bash
+   mkdir -p data/raw data/prepared data/dw
+   ```
 
 2. Place your CSV files in `data/raw/` with these expected names:
    - `customers_data.csv`
@@ -363,9 +404,11 @@ For the data processing pipeline to work, ensure your CSV files are placed in th
    - **Individual**: Run each script separately as shown above
 
 4. Build the data warehouse:
-   `uv run python src/analytics_project/etl_to_dw.py`
+   ```bash
+   uv run python src/analytics_project/etl_to_dw.py
+   ```
 
-## Data Processing Features
+## 🔄 Data Processing Features
 
 ### Reusable DataScrubber Class
 - **Modular Design**: Encapsulates common data cleaning operations in a reusable class
@@ -392,7 +435,23 @@ For the data processing pipeline to work, ensure your CSV files are placed in th
 - **Outlier Detection**: Removes negative sales and extreme sale amounts using statistical methods
 - **Data Integrity**: Cross-references customers and products to identify orphaned records
 
-## Troubleshooting
+## ❓ Troubleshooting
+
+### Common Issues
+
+**Pre-commit hooks failing:**
+```bash
+uv run pre-commit run --all-files
+```
+
+**Module not found errors:**
+```bash
+uv sync --extra dev --extra docs --upgrade
+```
+
+**Data file path issues:**
+- Ensure you're running commands from project root
+- Verify CSV files are in `data/raw/` with exact names
 
 If any data preparation script fails, check:
 
@@ -410,3 +469,24 @@ If the ETL script fails, verify:
 - Check the verification output for data loading issues
 
 View detailed logs for each script execution to identify and resolve data quality problems.
+
+## 🗺️ Development Roadmap
+
+- [ ] Add more data validation rules
+- [ ] Implement data quality metrics dashboard
+- [ ] Add automated data profiling
+- [ ] Support for additional database backends
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 🔄 Data Flow
+
+Raw CSV Files → Data Preparation → Cleaned Data → ETL Process → Data Warehouse → Analytics
