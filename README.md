@@ -292,14 +292,41 @@ Each time forward progress is made, remember to git add-commit-push.
 4. **Missing Values**: Implemented robust handling for null values in campaign IDs and payment types
 5. **Data Integrity**: Established foreign key constraints between fact and dimension tables
 
-### Project Structure
+### File Structure
 
-The data warehouse integrates with the existing project structure:
+src/analytics_project/
+├── etl_to_dw.py            # Data warehouse ETL pipeline
+├── data_prep.py            # Unified data preparation orchestrator
+├── demo_module_*.py        # Demo modules
+└── utils_logger.py         # Logging utilities
 
-- **data/dw/**: Contains the SQLite database file
-- **data/prepared/**: Source CSV files for ETL process
-- **src/analytics_project/etl_to_dw.py**: Main ETL script
-- **src/analytics_project/data_prep.py**: Data preparation script
+scripts/data_preparation/
+├── prepare_customers_data.py # Individual customer data preparation
+├── prepare_products_data.py  # Individual product data preparation
+└── prepare_sales_data.py     # Individual sales data preparation
+
+utils/
+├── logger.py                 # Logger configuration
+└── data_scrubber.py          # Reusable DataScrubber class
+
+data/
+├── dw/                      # Data warehouse database (output)
+├── prepared/                # Cleaned CSV files (output)
+└── raw/                     # Raw CSV files (input)
+
+### Project Architecture
+
+**Key Components**:
+- **etl_to_dw.py**: Main ETL pipeline that creates and populates the data warehouse
+- **data_prep.py**: Main entry point that orchestrates the entire data preparation pipeline
+- **DataScrubber**: Reusable class that provides standardized data cleaning operations
+- **Individual Scripts**: Specialized scripts for dataset-specific processing logic
+- **Logger**: Consistent logging across all data processing components
+
+**Data Flow**:
+1. Raw CSV files → Data Preparation → Cleaned CSV files
+2. Cleaned CSV files → ETL Process → Data Warehouse
+3. Data Warehouse → Analytical Queries → Business Insights
 
 ### Usage Examples
 
@@ -335,6 +362,33 @@ For the data processing pipeline to work, ensure your CSV files are placed in th
 
 4. Build the data warehouse:
    `uv run python src/analytics_project/etl_to_dw.py`
+
+## Data Processing Features
+
+### Reusable DataScrubber Class
+- **Modular Design**: Encapsulates common data cleaning operations in a reusable class
+- **Consistent API**: Standardized methods for column cleaning, duplicate removal, missing value handling
+- **Extensible**: Easy to add new cleaning methods for specific business needs
+- **Validation**: Built-in data validation against configurable business rules
+
+### Customer Data Processing
+- **Column Addition**: Adds LoyaltyPoints and CustomerSegment columns with realistic distributions
+- **Data Cleaning**: Handles missing values, removes duplicates, and standardizes segment names
+- **Validation**: Ensures CustomerID uniqueness and valid loyalty point ranges
+- **Outlier Removal**: Filters extreme loyalty points and invalid customer IDs
+
+### Product Data Processing
+- **Column Addition**: Adds StockQuantity and ProductCategory columns with realistic values
+- **Data Cleaning**: Standardizes category names, handles negative stock quantities
+- **Quality Control**: Uses IQR method for outlier detection in stock levels
+- **Format Standardization**: Converts text to title case and ensures proper data types
+
+### Sales Data Processing
+- **Numeric Cleaning**: Converts all numeric columns to proper types, handles conversion errors
+- **Date Standardization**: Converts SaleDate to consistent YYYY-MM-DD format
+- **Business Logic**: Validates discount percentages (0-100%) and payment types
+- **Outlier Detection**: Removes negative sales and extreme sale amounts using statistical methods
+- **Data Integrity**: Cross-references customers and products to identify orphaned records
 
 ## Troubleshooting
 
