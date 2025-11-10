@@ -1,91 +1,92 @@
-import duckdb
+import sqlite3
 import pandas as pd
+from datetime import datetime
 
-# Create or connect to DuckDB database
-conn = duckdb.connect('my_data_warehouse.duckdb')
+# Create or connect to SQLite database
+conn = sqlite3.connect('my_data_warehouse.db')
+cursor = conn.cursor()
 
-print("Building Data Warehouse...")
+print("Building Data Warehouse with SQLite...")
 
-# Create tables with optimized schema
-conn.execute("""
+# Create tables with optimized schema - using EXACT column names from CSV
+cursor.execute("""
     -- Create customers dimension table
-    CREATE OR REPLACE TABLE customers (
-        customer_id TEXT PRIMARY KEY,
+    CREATE TABLE IF NOT EXISTS customers (
+        customerid TEXT PRIMARY KEY,
         name TEXT,
         region TEXT,
-        join_date TEXT,
-        loyalty_points REAL,
-        customer_tier TEXT,
-        customer_segment TEXT
+        joindate TEXT,
+        loyaltypoints REAL,
+        customertier TEXT,
+        customersegment TEXT
     );
+""")
 
+cursor.execute("""
     -- Create products dimension table
-    CREATE OR REPLACE TABLE products (
-        product_id TEXT PRIMARY KEY,
-        product_name TEXT,
+    CREATE TABLE IF NOT EXISTS products (
+        productid TEXT PRIMARY KEY,
+        productname TEXT,
         category TEXT,
-        unit_price REAL,
-        stock_quantity INTEGER,
+        unitprice REAL,
+        stockquantity INTEGER,
         supplier TEXT,
-        product_category TEXT
+        productcategory TEXT
     );
+""")
 
+cursor.execute("""
     -- Create sales fact table
-    CREATE OR REPLACE TABLE sales (
-        transaction_id INTEGER PRIMARY KEY,
-        sale_date TEXT,
-        customer_id TEXT,
-        product_id TEXT,
-        store_id TEXT,
-        campaign_id TEXT,
-        sale_amount REAL,
-        discount_percent REAL,
-        payment_type TEXT,
-        FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
-        FOREIGN KEY (product_id) REFERENCES products(product_id)
+    CREATE TABLE IF NOT EXISTS sales (
+        transactionid INTEGER PRIMARY KEY,
+        saledate TEXT,
+        customerid TEXT,
+        productid TEXT,
+        storeid TEXT,
+        campaignid TEXT,
+        saleamount REAL,
+        discountpercent REAL,
+        paymenttype TEXT,
+        FOREIGN KEY (customerid) REFERENCES customers(customerid),
+        FOREIGN KEY (productid) REFERENCES products(productid)
     );
 """)
 
 print("Tables created successfully!")
 
-# Load data from CSV files
+# Load data from CSV files with correct paths
 print("Loading data...")
 
-# Load customers data with data cleaning
-conn.execute("""
-    INSERT OR REPLACE INTO customers
-    SELECT
-        customerid,
-        name,
-        UPPER(TRIM(region)) as region,  -- Clean region data
-        joindate,
-        loyaltypoints,
-        COALESCE(NULLIF(customertier, ''), 'Unknown') as customer_tier,  -- Handle missing tiers
-        customersegment
-    FROM read_csv('customers_prepared.csv', auto_detect=true)
-""")
+# Load customers data from data/prepared/ directory
+customers_df = pd.read_csv('data/prepared/customers_prepared.csv')
+# Clean and standardize the data
+customers_df['region'] = customers_df['region'].str.upper().str.strip()
+customers_df['customertier'] = customers_df['customertier'].fillna('Unknown')
+customers_df.to_sql('customers', conn, if_exists='replace', index=False)
 
 # Load products data
-conn.execute("""
-    INSERT OR REPLACE INTO products
-    SELECT * FROM read_csv('products_prepared.csv', auto_detect=true)
-""")
+products_df = pd.read_csv('data/prepared/products_prepared.csv')
+products_df.to_sql('products', conn, if_exists='replace', index=False)
 
-# Load sales data with data cleaning and date formatting
-conn.execute("""
-    INSERT OR REPLACE INTO sales
-    SELECT
-        transactionid,
-        strptime(saledate, '%m/%d/%Y')::date as sale_date,  -- Convert to proper date
-        customerid,
-        productid,
-        storeid,
-        COALESCE(NULLIF(campaignid, ''), '0') as campaign_id,  -- Handle missing campaign IDs
-        COALESCE(saleamount, 0) as sale_amount,  -- Handle missing sale amounts
-        discountpercent,
-        COALESCE(NULLIF(paymenttype, ''), 'Unknown') as payment_type  -- Handle missing payment types
-    FROM read_csv('sales_prepared.csv', auto_detect=true)
-""")
+# Load and clean sales data
+sales_df = pd.read_csv('data/prepared/sales_prepared.csv')
+
+
+# Convert date format from MM/DD/YYYY to YYYY-MM-DD (ISO 8601)
+def convert_date(date_str):
+    try:
+        return datetime.strptime(date_str, '%m/%d/%Y').strftime('%Y-%m-%d')
+    except:
+        return date_str
+
+
+sales_df['saledate'] = sales_df['saledate'].apply(convert_date)
+# Handle missing values
+sales_df['campaignid'] = sales_df['campaignid'].fillna('0')
+sales_df['saleamount'] = sales_df['saleamount'].fillna(0)
+sales_df['paymenttype'] = sales_df['paymenttype'].fillna('Unknown')
+
+sales_df.to_sql('sales', conn, if_exists='replace', index=False)
 
 print("Data loaded successfully!")
 
@@ -95,29 +96,38 @@ print("\n=== Data Warehouse Verification ===")
 # Check row counts
 tables = ['customers', 'products', 'sales']
 for table in tables:
-    count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+    count = cursor.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
     print(f"{table}: {count} rows")
 
-# Sample query to test the star schema
+# Verify column names in each table
+print("\n=== Column Names Verification ===")
+for table in tables:
+    columns = cursor.execute(f"PRAGMA table_info({table})").fetchall()
+    print(f"{table} columns: {[col[1] for col in columns]}")
+
+# Sample query to test the star schema - using ACTUAL column names
 print("\n=== Sample Analytical Query ===")
-result = conn.execute("""
+result = pd.read_sql_query(
+    """
     SELECT
         c.region,
         p.category,
-        SUM(s.sale_amount) as total_sales,
+        SUM(s.saleamount) as total_sales,
         COUNT(*) as transaction_count,
-        AVG(s.discount_percent) as avg_discount
+        AVG(s.discountpercent) as avg_discount
     FROM sales s
-    JOIN customers c ON s.customer_id = c.customer_id
-    JOIN products p ON s.product_id = p.product_id
+    JOIN customers c ON s.customerid = c.customerid
+    JOIN products p ON s.productid = p.productid
     GROUP BY c.region, p.category
     ORDER BY total_sales DESC
     LIMIT 10
-""").df()
+""",
+    conn,
+)
 
 print(result)
 
 # Close connection
 conn.close()
 
-print("\nData warehouse built successfully! Ready for analysis.")
+print("\nData warehouse built successfully with SQLite! Ready for analysis.")
