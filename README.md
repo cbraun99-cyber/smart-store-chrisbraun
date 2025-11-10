@@ -294,11 +294,12 @@ Each time forward progress is made, remember to git add-commit-push.
 
 ### File Structure
 
+```
 src/analytics_project/
-├── etl_to_dw.py            # Data warehouse ETL pipeline
-├── data_prep.py            # Unified data preparation orchestrator
-├── demo_module_*.py        # Demo modules
-└── utils_logger.py         # Logging utilities
+├── etl_to_dw.py              # Data warehouse ETL pipeline
+├── data_prep.py              # Unified data preparation orchestrator
+├── demo_module_*.py          # Demo modules
+└── utils_logger.py           # Logging utilities
 
 scripts/data_preparation/
 ├── prepare_customers_data.py # Individual customer data preparation
@@ -310,9 +311,10 @@ utils/
 └── data_scrubber.py          # Reusable DataScrubber class
 
 data/
-├── dw/                      # Data warehouse database (output)
-├── prepared/                # Cleaned CSV files (output)
-└── raw/                     # Raw CSV files (input)
+├── dw/                       # Data warehouse database (output)
+├── prepared/                 # Cleaned CSV files (output)
+└── raw/                      # Raw CSV files (input)
+```
 
 ### Project Architecture
 
