@@ -177,19 +177,20 @@ You should see:
 
 You have two options for processing your data - individual scripts or a unified pipeline:
 
-#### Option A: Unified Data Preparation (Recommended)
+## 🚀 Execution Options
+
+### Option A: Unified Data Preparation (Recommended for Production)
 ```bash
 uv run python src/analytics_project/data_prep.py
 ```
 
-**Features:**
-- Processes all 3 datasets in a single execution
-- Uses reusable `DataScrubber` class for consistent cleaning
-- Applies dataset-specific business logic and validation
-- Performs cross-dataset integrity checks
-- Provides comprehensive logging and summary reporting
+**Benefits:**
+- Single command processes all datasets
+- Consistent logging and error handling
+- Cross-dataset validation
+- Better for automated workflows
 
-#### Option B: Individual Data Preparation Scripts
+### Option B: Individual Data Preparation Scripts (Recommended for Development/Debugging)
 Run the individual data preparation scripts to process CSV files and created cleaned datasets:
 
 ##### Customer Data Preparation
@@ -197,38 +198,20 @@ Run the individual data preparation scripts to process CSV files and created cle
 uv run python scripts/data_preparation/prepare_customers_data.py
 ```
 
-**Features:**
-- Adds customer-related columns (LoyaltyPoints, CustomerSegment)
-- Removes duplicate customers based on CustomerID
-- Handles missing values (fills LoyaltyPoints with 0, CustomerSegment with 'Unknown')
-- Cleans and validates loyalty points and customer segments
-- Removes outliers and invalid CustomerIDs
+**Benefits:**
+- Isolated processing for debugging
+- Detailed logs for each dataset
+- Easier to identify dataset-specific issues
 
 ##### Product Data Preparation
 ```bash
 uv run python scripts/data_preparation/prepare_products_data.py
 ```
 
-**Features:**
-- Adds product-related columns (StockQuantity, ProductCategory)
-- Removes duplicate products based on ProductID
-- Handles missing values (fills StockQuantity with 0, ProductCategory with 'Uncategorized')
-- Cleans stock quantities and standardizes product categories
-- Removes outliers using IQR method
-- Standardizes text formatting
-
 ##### Sales Data Preparation
 ```bash
 uv run python scripts/data_preparation/prepare_sales_data.py
 ```
-
-**Features:**
-- Cleans numeric columns (SaleAmount, DiscountPercent, etc.)
-- Standardizes date formats and removes invalid dates
-- Removes duplicate transactions based on TransactionID
-- Handles missing values (fills CampaignID with -1, DiscountPercent with 0)
-- Cleans discount percentages and payment types
-- Removes outliers based on sale amounts
 
 **Expected Output for All Scripts:**
 - Detailed log messages showing each processing step
@@ -274,6 +257,62 @@ With a working version safe in GitHub, start making changes to the code.
 Before starting a new session, remember to do a `git pull` and keep your tools updated.
 
 Each time forward progress is made, remember to git add-commit-push.
+
+### 3.9 Data Development Workflow
+
+**When modifying data processing:**
+1. Make changes to individual preparation scripts for testing
+2. Run the specific script to verify changes
+3. Once working, integrate changes into the unified `data_prep.py`
+4. Test the unified pipeline end-to-end
+5. Update documentation if new columns or validation rules are added
+
+**Adding New Data Sources:**
+1. Create new preparation script in `scripts/data_preparation/`
+2. Follow existing patterns in `DataScrubber` class
+3. Add to unified pipeline in `data_prep.py`
+4. Update data warehouse schema in `etl_to_dw.py`
+5. Update validation in `validate_data_integrity()`
+
+---
+
+## 🔍 Data Quality & Validation
+
+**Comprehensive Data Validation:**
+- **DataScrubber Class**: Reusable utility for consistent data cleaning across all datasets
+- **Statistical Outlier Detection**: IQR method for identifying and removing outliers
+- **Business Rule Validation**: Enforces domain-specific rules (discount percentages 0-100%, valid payment types, etc.)
+- **Cross-Dataset Integrity**: Validates relationships between customers, products, and sales
+- **Data Profiling**: Automatic logging of data shapes, types, and quality metrics
+
+**Validation Checks:**
+- CustomerID and ProductID uniqueness
+- Referential integrity between sales and dimension tables
+- Numeric range validation (loyalty points, stock quantities, sale amounts)
+- Categorical value standardization
+- Date format consistency
+
+---
+
+## 📁 Data Requirements
+
+### Expected Input File Structure
+
+**Required CSV files in `data/raw/`:**
+- `customers_data.csv` - Must contain: CustomerID, Name, Region, JoinDate
+- `products_data.csv` - Must contain: ProductID, ProductName, Category, UnitPrice, Supplier
+- `sales_data.csv` - Must contain: TransactionID, SaleDate, CustomerID, ProductID, SaleAmount
+
+**Optional Columns (will be generated if missing):**
+- Customers: LoyaltyPoints, CustomerSegment
+- Products: StockQuantity, ProductCategory
+- Sales: DiscountPercent, PaymentType, CampaignID, StoreID
+
+### Data Quality Expectations
+- Files should be UTF-8 encoded CSV
+- Primary keys (CustomerID, ProductID, TransactionID) must be unique
+- Dates should be in recognizable formats
+- Numeric columns should contain valid numbers
 
 ---
 
@@ -354,59 +393,27 @@ Each time forward progress is made, remember to git add-commit-push.
 - Payment method preferences
 - Seasonal sales trends
 
-### File Structure
-
-```
-src/analytics_project/
-├── etl_to_dw.py              # Data warehouse ETL pipeline
-├── data_prep.py              # Unified data preparation orchestrator
-├── demo_module_*.py          # Demo modules
-└── utils_logger.py           # Logging utilities
-
-scripts/data_preparation/
-├── prepare_customers_data.py # Individual customer data preparation
-├── prepare_products_data.py  # Individual product data preparation
-└── prepare_sales_data.py     # Individual sales data preparation
-
-utils/
-├── logger.py                 # Logger configuration
-└── data_scrubber.py          # Reusable DataScrubber class
-
-data/
-├── dw/                       # Data warehouse database (output)
-├── prepared/                 # Cleaned CSV files (output)
-└── raw/                      # Raw CSV files (input)
-```
-
-### Execution Commands
-
-1. Prepare data: `uv run python src/analytics_project/data_prep.py`
-2. Build warehouse: `uv run python src/analytics_project/etl_to_dw.py`
-
 ---
 
-## 📁 Data Files Preparation
+## ✨ Key Technical Features
 
-For the data processing pipeline to work, ensure your CSV files are placed in the correct location:
+**Modular Architecture:**
+- **DataScrubber**: Reusable cleaning utility with consistent API
+- **Unified Pipeline**: Single entry point for all data processing
+- **Individual Scripts**: Isolated processing for development/debugging
 
-1. Create the data directory structure:
-   ```bash
-   mkdir -p data/raw data/prepared data/dw
-   ```
+**Production-Ready:**
+- Comprehensive logging at every step
+- Robust error handling and validation
+- Data quality metrics and reporting
+- Cross-dataset integrity checks
 
-2. Place your CSV files in `data/raw/` with these expected names:
-   - `customers_data.csv`
-   - `products_data.csv`
-   - `sales_data.csv`
+**Extensible Design:**
+- Easy to add new data sources
+- Configurable cleaning rules
+- Modular validation framework
 
-3. Run the data preparation using either approach:
-   - **Unified**: `uv run python src/analytics_project/data_prep.py`
-   - **Individual**: Run each script separately as shown above
-
-4. Build the data warehouse:
-   ```bash
-   uv run python src/analytics_project/etl_to_dw.py
-   ```
+---
 
 ## 🔄 Data Processing Features
 
@@ -435,7 +442,9 @@ For the data processing pipeline to work, ensure your CSV files are placed in th
 - **Outlier Detection**: Removes negative sales and extreme sale amounts using statistical methods
 - **Data Integrity**: Cross-references customers and products to identify orphaned records
 
-## ❓ Troubleshooting
+---
+
+## ❓ Enhanced Troubleshooting
 
 ### Common Issues
 
@@ -452,6 +461,32 @@ uv sync --extra dev --extra docs --upgrade
 **Data file path issues:**
 - Ensure you're running commands from project root
 - Verify CSV files are in `data/raw/` with exact names
+
+### Data Preparation Issues
+
+**Missing Columns:**
+- Scripts automatically generate missing optional columns with realistic data
+- Required columns will cause failures if missing
+
+**Data Type Conversion Errors:**
+- Check for non-numeric values in numeric columns
+- Verify date formats are consistent
+
+**Foreign Key Violations:**
+- Run individual preparation scripts to identify orphaned records
+- Check logs for cross-dataset validation warnings
+
+### Performance Tips
+
+**Large Datasets:**
+- Use unified pipeline for better performance
+- Monitor memory usage with very large files
+- Consider chunk processing for datasets > 1GB
+
+**Debugging:**
+- Run individual scripts for detailed dataset-specific logging
+- Check `utils/logger.py` for log configuration options
+- Use `uv run python -m pdb script.py` for interactive debugging
 
 If any data preparation script fails, check:
 
@@ -470,12 +505,16 @@ If the ETL script fails, verify:
 
 View detailed logs for each script execution to identify and resolve data quality problems.
 
+---
+
 ## 🗺️ Development Roadmap
 
 - [ ] Add more data validation rules
 - [ ] Implement data quality metrics dashboard
 - [ ] Add automated data profiling
 - [ ] Support for additional database backends
+
+---
 
 ## 🤝 Contributing
 
@@ -490,3 +529,33 @@ View detailed logs for each script execution to identify and resolve data qualit
 ## 🔄 Data Flow
 
 Raw CSV Files → Data Preparation → Cleaned Data → ETL Process → Data Warehouse → Analytics
+
+---
+
+## 📁 File Structure
+
+```
+src/analytics_project/
+├── etl_to_dw.py              # Data warehouse ETL pipeline
+├── data_prep.py              # Unified data preparation orchestrator
+├── demo_module_*.py          # Demo modules
+└── utils_logger.py           # Logging utilities
+
+scripts/data_preparation/
+├── prepare_customers_data.py # Individual customer data preparation
+├── prepare_products_data.py  # Individual product data preparation
+└── prepare_sales_data.py     # Individual sales data preparation
+
+utils/
+├── logger.py                 # Logger configuration
+└── data_scrubber.py          # Reusable DataScrubber class
+
+data/
+├── dw/                       # Data warehouse database (output)
+├── prepared/                 # Cleaned CSV files (output)
+└── raw/                      # Raw CSV files (input)
+```
+
+---
+
+*Last updated: $(date)*
