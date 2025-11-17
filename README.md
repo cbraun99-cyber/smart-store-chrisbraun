@@ -395,6 +395,100 @@ Each time forward progress is made, remember to git add-commit-push.
 
 ---
 
+## 📊 POWER BI REPORTING & VISUALIZATION
+
+### Project Overview
+Cross-platform reporting implementation using Power BI Desktop to analyze data warehouse information and generate business intelligence insights through interactive dashboards and OLAP operations.
+
+### Implementation Details
+
+**Technical Stack:**
+- **Reporting Tool**: Power BI Desktop
+- **Data Connection**: ODBC with SmartSalesDSN
+- **Database**: SQLite data warehouse (`data/dw/smart_sales.db`)
+- **Integration**: Python scripts for data loading and transformation
+
+**OLAP Operations Implemented:**
+
+**Slicing (Temporal Filtering)**
+- Date range slicer for interactive temporal filtering
+- Power Query transformations to extract date parts from `saledate`
+- Added hierarchy columns: `sale_year`, `sale_quarter`, `sale_month`
+- Enabled "Between" date range selection in slicer visual
+
+**Dicing (Multi-dimensional Analysis)**
+- Matrix visual for cross-tabulation analysis
+- Product category × customer region dimensional breakdown
+- Dynamic aggregation of sales amounts across multiple dimensions
+- Interactive filtering and drill-through capabilities
+
+**Drilldown (Hierarchical Exploration)**
+- Time hierarchy implementation: Year → Quarter → Month
+- Column chart with drilldown enabled for temporal analysis
+- Interactive navigation through aggregation levels
+- Visual drilldown indicators and navigation controls
+
+### Visualizations Created
+
+**Core Dashboard Components:**
+- **Top Customers Bar Chart**: Customer spending analysis with descending sort
+- **Sales Trends Line Chart**: Temporal sales pattern identification
+- **Category × Region Matrix**: Cross-dimensional business intelligence
+- **Time Drilldown Column Chart**: Hierarchical date analysis
+- **Interactive Slicers**: Date range and categorical filters
+
+**Business Insights Generated:**
+- Customer segmentation by spending patterns and regional distribution
+- Product category performance tracking and trend analysis
+- Seasonal sales patterns and temporal business cycles
+- Regional market performance comparisons
+
+### Technical Implementation
+
+**Data Model Architecture:**
+```
+[Power BI Data Model]
+customers_df (Dimension) → sales_df (Fact) ← products_df (Dimension)
+     ↓                          ↓                    ↓
+  region                    saleamount           category
+   name                     saledate            productname
+ customerid                discountpercent       unitprice
+```
+
+**Key Technical Decisions:**
+- **Python Integration**: Used Python scripts for reliable data loading bypassing ODBC limitations
+- **Date Processing**: Implemented Power Query transformations for SQLite date handling
+- **Relationship Modeling**: Established star schema relationships between fact and dimension tables
+- **Visual Hierarchy**: Created intuitive drilldown paths for business user exploration
+
+### Files & Deliverables
+
+**Power BI Assets:**
+- `SmartSales.pbix` - Complete Power BI report file
+- Data model relationship documentation
+- OLAP operation implementation evidence
+- Business insight summaries and visualizations
+
+**Documentation Requirements:**
+- Screenshot of Power BI Model View showing table relationships
+- Evidence of slicing operation with date range filter
+- Matrix visual demonstrating dicing operation
+- Drilldown hierarchy showing Year → Quarter → Month navigation
+
+### Business Value Delivered
+
+**Actionable Intelligence:**
+- **Customer Analytics**: Identification of high-value customer segments and regional preferences
+- **Product Performance**: Category-level sales tracking and inventory optimization insights
+- **Temporal Trends**: Seasonal pattern recognition for strategic planning
+- **Operational Efficiency**: Cross-dimensional analysis for targeted marketing and sales strategies
+
+**Decision Support:**
+- Data-driven customer segmentation for targeted campaigns
+- Regional performance analysis for market expansion decisions
+- Product category optimization based on sales performance
+- Temporal trend identification for inventory and staffing planning
+
 ## ✨ Key Technical Features
 
 **Modular Architecture:**
