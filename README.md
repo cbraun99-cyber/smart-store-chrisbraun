@@ -652,4 +652,4 @@ data/
 
 ---
 
-*Last updated: November 15, 2025*
+*Last updated: November 19, 2025*
