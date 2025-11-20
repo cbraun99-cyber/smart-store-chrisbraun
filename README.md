@@ -579,6 +579,142 @@ View detailed logs for each script execution to identify and resolve data qualit
 
 ---
 
+# P6 OLAP Analysis: Customer Engagement & Loyalty Program Optimization
+
+## 1. The Business Goal
+
+**"Identify high-value customer segments with declining engagement to target for loyalty program reactivation and optimize upsell opportunities."**
+
+**Why this matters:**
+- Prevent customer churn by identifying at-risk segments early
+- Maximize ROI from loyalty programs through targeted interventions
+- Increase customer lifetime value through strategic upselling
+- Improve marketing efficiency by focusing on high-potential segments
+
+## 2. Data Source
+
+**Primary Source:** Data Warehouse (`smart_sales.db`)
+- **Tables Used:** `sales`, `customers`
+- **Key Columns:**
+  - `sales[saledate]` - For temporal analysis and trend identification
+  - `sales[saleamount]` - Primary metric for engagement measurement
+  - `customers[region]` - Geographic segmentation
+  - `customers[customersegment]` - Customer classification
+  - `customers[customerid]` - Unique customer identification
+
+## 3. Tools
+
+**Primary Tool:** Power BI Desktop
+- **Why Power BI:** Excellent for interactive OLAP operations, built-in time intelligence, and professional visualization capabilities
+- **Supporting Tools:** Python/pandas for data validation and quality checks
+- **File:** `customer_engagement_olap.pbix` (custom analysis file)
+
+## 4. Workflow & Logic
+
+### Dimensions & Aggregations:
+- **Descriptive Dimensions:** Region, Customer Segment, Time (Year/Quarter)
+- **Numeric Metrics:** Total Sales, Sales Change %, Customer Count
+- **Aggregations:** SUM(saleamount), COUNT DISTINCT(customerid), QUARTER-OVER-QUARTER comparison
+
+### OLAP Operations Implemented:
+
+#### **Slicing:**
+- Date range filtering to focus on specific time periods
+- Customer segment filtering to analyze specific groups
+- Regional filtering for geographic analysis
+
+#### **Dicing:**
+- Matrix visual breaking down sales by Region × Customer Segment simultaneously
+- Multi-dimensional analysis revealing geographic and demographic patterns
+
+#### **Drilldown:**
+- Time hierarchy from Year → Quarter for trend analysis
+- Customer segment → Regional performance drill-through
+
+### DAX Measures Created:
+```
+Total Sales = SUM(sales[saleamount])
+Sales Previous Quarter = CALCULATE([Total Sales], DATEADD('Date'[Date], -1, QUARTER))
+Sales Change % = DIVIDE([Total Sales] - [Sales Previous Quarter], [Sales Previous Quarter])
+```
+
+## 5. Results
+
+### Key Insights Uncovered:
+
+#### **Critical Finding: BASIC Segment Crisis**
+- **BASIC segment** shows severe underperformance with only **$288** total sales
+- Compared to **NEW segment** at **$399,449** and **STANDARD segment** at **$593,684**
+- **Action:** Immediate intervention required for BASIC segment retention
+
+#### **Regional Performance Patterns:**
+- **EAST region** dominates with **$557,243** total sales (34.5% of total)
+- **WEST region** shows strong performance at **$255,097**
+- **CENTRAL region** underperforms relative to customer base size
+
+#### **Growth Trends:**
+- Most segments show **positive Sales Change %** (1.39% - 2.36%)
+- **STANDARD segment** maintains consistent growth at **1.66%**
+- **BASIC segment** shows **0% growth** - clear engagement issue
+
+### Visualizations Created:
+- **Matrix Visual:** Region × Customer Segment × Sales metrics
+- **Line Chart:** Temporal sales trends by customer segment
+- **Interactive Slicers:** Date range and regional filters
+
+## 6. Suggested Business Actions
+
+### **Immediate Actions (Next 30 days):**
+1. **BASIC Segment Reactivation Campaign**
+   - Targeted offers to re-engage dormant BASIC customers
+   - Personalized communication addressing specific pain points
+   - Loyalty point bonuses for resumed purchasing
+
+2. **EAST Region Premium Upgrade Initiative**
+   - Leverage strong market position to upgrade STANDARD → PREMIUM
+   - Exclusive offers for EAST region PREMIUM conversions
+   - Regional-specific loyalty benefits
+
+3. **CENTRAL Region Growth Strategy**
+   - Investigate underperformance causes
+   - Localized marketing campaigns
+   - Regional manager performance review
+
+### **Strategic Actions (Next 90 days):**
+1. **Loyalty Program Tier Restructuring**
+   - Reevaluate BASIC segment value proposition
+   - Create clearer path from BASIC → STANDARD → PREMIUM
+   - Implement engagement-based tier progression
+
+2. **Customer Lifecycle Management**
+   - Proactive outreach to at-risk segments
+   - Predictive modeling for churn prevention
+   - Automated engagement scoring
+
+## 7. Challenges
+
+### **Technical Challenges:**
+1. **Date Table Relationships:** Initial issues with date hierarchy creation due to data type mismatches and relationship cardinality
+   - **Solution:** Implemented dedicated DateDimension table with proper DateKey relationships
+
+2. **Power BI Learning Curve:** Mastering OLAP operations within Power BI's visualization framework
+   - **Solution:** Iterative testing and validation of slicing, dicing, and drilldown functionality
+
+3. **Data Quality:** Inconsistent date formats and missing segment classifications in raw data
+   - **Solution:** Enhanced data preparation scripts with robust validation and imputation
+
+### **Analytical Challenges:**
+1. **Identifying Meaningful Patterns:** Distinguishing between random fluctuations and significant trends
+   - **Solution:** Focused on quarter-over-quarter comparisons and statistical significance
+
+2. **Actionable Insight Generation:** Moving from data observation to concrete business recommendations
+   - **Solution:** Structured analysis framework with clear business question → analysis → action workflow
+
+### **Lessons Learned:**
+- Proper date dimension setup is critical for time-based analysis
+- OLAP operations provide powerful multi-dimensional insights when properly configured
+- The most valuable insights often come from comparing performance across multiple dimensions simultaneously
+
 ## 🗺️ Development Roadmap
 
 - [ ] Add more data validation rules
@@ -638,4 +774,4 @@ docs/
 
 ---
 
-*Last updated: November 19, 2025*
+*Last updated: November 20, 2025*
