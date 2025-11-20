@@ -618,6 +618,16 @@ View detailed logs for each script execution to identify and resolve data qualit
 
 ### OLAP Operations Implemented:
 
+### Visualizations Created:
+![OLAP Matrix](docs/images/olap_matrix.png)
+*Matrix visual demonstrating dicing operation across regions and customer segments*
+
+![Sales Trends](docs/images/olap_trends.png)
+*Line chart showing temporal patterns with drilldown capability*
+
+![Interactive Slicers](docs/images/olap_slicers.png)
+*Date and region slicers enabling slicing operations*
+
 #### **Slicing:**
 - Date range filtering to focus on specific time periods
 - Customer segment filtering to analyze specific groups
